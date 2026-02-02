@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Search, 
@@ -9,20 +8,20 @@ import {
   FormInput, 
   Bell, 
   LayoutGrid, 
-  Tag, 
   Table2, 
   MessageSquare, 
-  List, 
-  MousePointer2, 
-  Loader2, 
-  Info,
-  PanelLeft,
-  PanelTop,
   Navigation,
   Palette,
   Type,
   Image,
-  ChevronDown
+  ChevronDown,
+  Calendar,
+  Upload,
+  Tag,
+  GitBranch,
+  Wrench,
+  Loader2,
+  Info
 } from "lucide-react";
 import { ButtonShowcase } from "@/components/library/ButtonShowcase";
 import { InputShowcase } from "@/components/library/InputShowcase";
@@ -44,6 +43,20 @@ import { DropdownShowcase } from "@/components/library/DropdownShowcase";
 import { AvatarShowcase } from "@/components/library/AvatarShowcase";
 import { TypographyShowcase } from "@/components/library/TypographyShowcase";
 import { ColorsShowcase } from "@/components/library/ColorsShowcase";
+// Novos componentes
+import { DateTimeShowcase } from "@/components/library/DateTimeShowcase";
+import { RangeSliderShowcase } from "@/components/library/RangeSliderShowcase";
+import { FileUploadShowcase } from "@/components/library/FileUploadShowcase";
+import { RatingShowcase } from "@/components/library/RatingShowcase";
+import { ChipShowcase } from "@/components/library/ChipShowcase";
+import { StepperShowcase } from "@/components/library/StepperShowcase";
+import { TimelineShowcase } from "@/components/library/TimelineShowcase";
+import { TreeViewShowcase } from "@/components/library/TreeViewShowcase";
+import { ColorPickerShowcase } from "@/components/library/ColorPickerShowcase";
+import { CopyToClipboardShowcase } from "@/components/library/CopyToClipboardShowcase";
+import { SplitButtonShowcase } from "@/components/library/SplitButtonShowcase";
+import { NotificationBellShowcase } from "@/components/library/NotificationBellShowcase";
+import { LoaderShowcase } from "@/components/library/LoaderShowcase";
 
 const categories = [
   { id: "todos", label: "Todos", icon: LayoutGrid },
@@ -51,34 +64,84 @@ const categories = [
   { id: "tipografia", label: "Tipografia", icon: Type },
   { id: "botoes", label: "Botões", icon: Square },
   { id: "formularios", label: "Formulários", icon: FormInput },
+  { id: "datatime", label: "Data & Hora", icon: Calendar },
+  { id: "arquivos", label: "Arquivos & Mídia", icon: Upload },
+  { id: "tags", label: "Tags & Categorias", icon: Tag },
   { id: "layout", label: "Layout", icon: LayoutGrid },
   { id: "navegacao", label: "Navegação", icon: Navigation },
+  { id: "fluxo", label: "Fluxo & Progresso", icon: GitBranch },
   { id: "feedback", label: "Feedback", icon: Bell },
   { id: "dados", label: "Dados", icon: Table2 },
   { id: "overlay", label: "Overlay", icon: MessageSquare },
+  { id: "utilitarios", label: "Utilitários", icon: Wrench },
+  { id: "loading", label: "Loading", icon: Loader2 },
   { id: "icones", label: "Ícones", icon: Image },
 ];
 
 const components = [
+  // Design System
   { id: "colors", name: "Cores e Gradientes", category: "design", component: ColorsShowcase },
+  { id: "colorpicker", name: "Color Picker", category: "design", component: ColorPickerShowcase },
+  
+  // Tipografia
   { id: "typography", name: "Tipografia", category: "tipografia", component: TypographyShowcase },
+  
+  // Botões
   { id: "buttons", name: "Botões", category: "botoes", component: ButtonShowcase },
+  { id: "splitbutton", name: "Split Button", category: "botoes", component: SplitButtonShowcase },
+  
+  // Formulários
   { id: "inputs", name: "Inputs e Campos", category: "formularios", component: InputShowcase },
   { id: "select", name: "Select e Checkboxes", category: "formularios", component: SelectShowcase },
+  { id: "rangeslider", name: "Range Slider", category: "formularios", component: RangeSliderShowcase },
+  { id: "rating", name: "Rating / Avaliação", category: "formularios", component: RatingShowcase },
+  
+  // Data & Hora
+  { id: "datetime", name: "Date & Time Picker", category: "datatime", component: DateTimeShowcase },
+  
+  // Arquivos & Mídia
+  { id: "fileupload", name: "File Upload", category: "arquivos", component: FileUploadShowcase },
+  
+  // Tags & Categorias
+  { id: "badges", name: "Badges", category: "tags", component: BadgeShowcase },
+  { id: "chips", name: "Chips / Tags", category: "tags", component: ChipShowcase },
+  
+  // Layout
   { id: "cards", name: "Cards", category: "layout", component: CardShowcase },
   { id: "header", name: "Header", category: "layout", component: HeaderShowcase },
+  { id: "avatars", name: "Avatares", category: "layout", component: AvatarShowcase },
+  
+  // Navegação
   { id: "sidebar", name: "Menu Lateral", category: "navegacao", component: SidebarShowcase },
   { id: "breadcrumb", name: "Breadcrumb", category: "navegacao", component: BreadcrumbShowcase },
   { id: "tabs", name: "Tabs", category: "navegacao", component: TabsShowcase },
   { id: "pagination", name: "Paginação", category: "navegacao", component: PaginationShowcase },
+  { id: "treeview", name: "Tree View", category: "navegacao", component: TreeViewShowcase },
+  
+  // Fluxo & Progresso
+  { id: "stepper", name: "Stepper / Steps", category: "fluxo", component: StepperShowcase },
+  { id: "timeline", name: "Timeline", category: "fluxo", component: TimelineShowcase },
+  { id: "progress", name: "Progress Bar", category: "fluxo", component: ProgressShowcase },
+  
+  // Feedback
   { id: "alerts", name: "Alertas", category: "feedback", component: AlertShowcase },
-  { id: "progress", name: "Progresso e Loading", category: "feedback", component: ProgressShowcase },
-  { id: "badges", name: "Badges", category: "feedback", component: BadgeShowcase },
+  { id: "notification", name: "Notificações", category: "feedback", component: NotificationBellShowcase },
+  
+  // Dados
   { id: "tables", name: "Tabelas", category: "dados", component: TableShowcase },
+  
+  // Overlay
   { id: "dialogs", name: "Dialogs e Modais", category: "overlay", component: DialogShowcase },
   { id: "dropdowns", name: "Dropdowns", category: "overlay", component: DropdownShowcase },
   { id: "tooltips", name: "Tooltips", category: "overlay", component: TooltipShowcase },
-  { id: "avatars", name: "Avatares", category: "layout", component: AvatarShowcase },
+  
+  // Utilitários
+  { id: "copytoclipboard", name: "Copy to Clipboard", category: "utilitarios", component: CopyToClipboardShowcase },
+  
+  // Loading
+  { id: "loaders", name: "Loaders & Spinners", category: "loading", component: LoaderShowcase },
+  
+  // Ícones
   { id: "icons", name: "Galeria de Ícones", category: "icones", component: IconGallery },
 ];
 
@@ -106,7 +169,7 @@ export default function ComponentLibrary() {
             </div>
             <div>
               <h1 className="font-bold text-lg text-primary">NORTE</h1>
-              <p className="text-xs text-muted-foreground">Design System</p>
+              <p className="text-xs text-muted-foreground">Design System v2.0</p>
             </div>
           </div>
           
@@ -122,7 +185,8 @@ export default function ComponentLibrary() {
             </div>
           </div>
 
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{components.length} componentes</span>
             <Button variant="outline" size="sm" asChild>
               <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer">
                 Todos os Ícones Lucide
@@ -203,7 +267,7 @@ export default function ComponentLibrary() {
         <div className="container text-center">
           <p className="text-sm text-muted-foreground">
             <strong>NORTE – Sistema de Padrões Estrela</strong><br />
-            Versão 1.0 | Gerência de Desenvolvimento
+            Versão 2.0 | {components.length} Componentes | Gerência de Desenvolvimento
           </p>
         </div>
       </footer>
