@@ -21,8 +21,15 @@ import {
   GitBranch,
   Wrench,
   Loader2,
-  Info
+  Info,
+  Download,
+  FileText,
+  ExternalLink
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { generateComponentsZip, generateMarkdownDoc } from "@/lib/componentExport";
+import { saveAs } from "file-saver";
 import { ButtonShowcase } from "@/components/library/ButtonShowcase";
 import { InputShowcase } from "@/components/library/InputShowcase";
 import { AlertShowcase } from "@/components/library/AlertShowcase";
@@ -57,6 +64,7 @@ import { CopyToClipboardShowcase } from "@/components/library/CopyToClipboardSho
 import { SplitButtonShowcase } from "@/components/library/SplitButtonShowcase";
 import { NotificationBellShowcase } from "@/components/library/NotificationBellShowcase";
 import { LoaderShowcase } from "@/components/library/LoaderShowcase";
+import { useToast } from "@/hooks/use-toast";
 
 const categories = [
   { id: "todos", label: "Todos", icon: LayoutGrid },
@@ -149,6 +157,8 @@ export default function ComponentLibrary() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("todos");
   const [expandedComponent, setExpandedComponent] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
 
   const filteredComponents = useMemo(() => {
     return components.filter((comp) => {
@@ -157,6 +167,35 @@ export default function ComponentLibrary() {
       return matchesSearch && matchesCategory;
     });
   }, [search, activeCategory]);
+
+  const handleDownloadZip = async () => {
+    setIsExporting(true);
+    try {
+      await generateComponentsZip();
+      toast({
+        title: "Download iniciado!",
+        description: "O arquivo ZIP com os componentes está sendo baixado.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar ZIP",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDownloadMarkdown = () => {
+    const markdown = generateMarkdownDoc();
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+    saveAs(blob, "estrelaui-documentation.md");
+    toast({
+      title: "Download iniciado!",
+      description: "A documentação Markdown está sendo baixada.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -186,8 +225,42 @@ export default function ComponentLibrary() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{components.length} componentes</span>
-            <Button variant="outline" size="sm" asChild>
+            <span className="text-sm text-muted-foreground hidden md:inline">{components.length} componentes</span>
+            
+            <Button variant="outline" size="sm" asChild className="hidden sm:flex">
+              <Link to="/exemplo">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Ver Exemplo
+              </Link>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownloadMarkdown}
+              className="hidden sm:flex"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              .MD
+            </Button>
+            
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleDownloadZip}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              ZIP
+            </Button>
+            
+            <ThemeToggle />
+            
+            <Button variant="outline" size="sm" asChild className="hidden lg:flex">
               <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer">
                 Todos os Ícones Lucide
               </a>
