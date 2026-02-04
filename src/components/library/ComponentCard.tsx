@@ -22,12 +22,12 @@ export function ComponentCard({ title, description, code, children, category }: 
   };
 
   return (
-    <div className="bg-card rounded-lg border shadow-card overflow-hidden">
-      <div className="p-4 border-b bg-gradient-section">
+    <div className="bg-card rounded-lg border border-border shadow-card overflow-hidden">
+      <div className="p-4 border-b border-border bg-muted/30 dark:bg-muted/20">
         <div className="flex items-start justify-between">
           <div>
             {category && (
-              <span className="inline-block px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded mb-2">
+              <span className="inline-block px-2 py-0.5 text-xs font-medium bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary rounded mb-2">
                 {category}
               </span>
             )}
@@ -39,7 +39,7 @@ export function ComponentCard({ title, description, code, children, category }: 
               variant="ghost"
               size="icon"
               onClick={() => setShowCode(!showCode)}
-              className="h-8 w-8"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
               {showCode ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
             </Button>
@@ -47,7 +47,7 @@ export function ComponentCard({ title, description, code, children, category }: 
               variant="ghost"
               size="icon"
               onClick={handleCopy}
-              className="h-8 w-8"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
               {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
             </Button>
@@ -55,9 +55,12 @@ export function ComponentCard({ title, description, code, children, category }: 
         </div>
       </div>
       
-      <div className={cn("p-6 bg-card", !showCode && "flex items-center justify-center min-h-[120px]")}>
+      <div className={cn(
+        "p-6 bg-card",
+        !showCode && "flex items-center justify-center min-h-[120px]"
+      )}>
         {showCode ? (
-          <pre className="code-block text-xs overflow-x-auto whitespace-pre-wrap">
+          <pre className="bg-muted/50 dark:bg-muted/30 border border-border rounded-md p-4 font-mono text-xs overflow-x-auto whitespace-pre-wrap text-foreground">
             <code>{code}</code>
           </pre>
         ) : (
