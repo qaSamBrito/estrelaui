@@ -200,7 +200,7 @@ export default function ComponentLibrary() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-gradient-corporate flex items-center justify-center">
@@ -216,7 +216,7 @@ export default function ComponentLibrary() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                className="pl-10" 
+                className="pl-10 bg-background" 
                 placeholder="Buscar componentes..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -336,10 +336,10 @@ export default function ComponentLibrary() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t mt-16 py-8 bg-muted/30">
+      <footer className="border-t border-border mt-16 py-8 bg-muted/30 dark:bg-muted/10">
         <div className="container text-center">
           <p className="text-sm text-muted-foreground">
-            <strong>NORTE – Sistema de Padrões Estrela</strong><br />
+            <strong className="text-foreground">NORTE – Sistema de Padrões Estrela</strong><br />
             Versão 2.0 | {components.length} Componentes | Gerência de Desenvolvimento
           </p>
         </div>
