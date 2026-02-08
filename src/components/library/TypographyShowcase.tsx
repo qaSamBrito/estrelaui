@@ -1,6 +1,10 @@
 import React from "react";
 import { ComponentCard } from "./ComponentCard";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["typography"];
+
 export function TypographyShowcase() {
   return (
     <div className="space-y-6">
@@ -8,25 +12,9 @@ export function TypographyShowcase() {
         title="Títulos"
         description="Hierarquia visual de headings"
         category="Tipografia"
-        code={`// H1 - Título principal (text-primary)
-<h1 className="text-3xl font-bold text-primary tracking-tight">
-  Título Principal
-</h1>
-
-// H2 - Seções (text-secondary)
-<h2 className="text-2xl font-semibold text-secondary tracking-tight">
-  Título de Seção
-</h2>
-
-// H3 - Subseções (text-accent)
-<h3 className="text-xl font-semibold text-accent tracking-tight">
-  Subtítulo
-</h3>
-
-// H4 - Items (text-primary)
-<h4 className="text-lg font-medium text-primary">
-  Título de Item
-</h4>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-4 text-left w-full">
           <h1 className="text-3xl font-bold text-primary tracking-tight">Título Principal (H1)</h1>
@@ -40,30 +28,9 @@ export function TypographyShowcase() {
         title="Texto Base"
         description="Estilos de texto para conteúdo"
         category="Tipografia"
-        code={`// Texto padrão
-<p className="text-foreground">
-  Texto padrão do sistema.
-</p>
-
-// Texto secundário
-<p className="text-muted-foreground">
-  Texto secundário ou de suporte.
-</p>
-
-// Texto pequeno
-<p className="text-sm text-muted-foreground">
-  Texto pequeno para legendas.
-</p>
-
-// Texto de destaque
-<p className="font-medium text-foreground">
-  Texto em destaque.
-</p>
-
-// Link
-<a href="#" className="text-primary hover:underline">
-  Link de navegação
-</a>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-3 text-left w-full">
           <p className="text-foreground">Texto padrão do sistema.</p>
@@ -80,14 +47,9 @@ export function TypographyShowcase() {
         title="Cores de Texto"
         description="Cores semânticas para diferentes contextos"
         category="Tipografia"
-        code={`<p className="text-foreground">Texto padrão</p>
-<p className="text-primary">Texto primário</p>
-<p className="text-secondary">Texto secundário</p>
-<p className="text-muted-foreground">Texto muted</p>
-<p className="text-success">Texto de sucesso</p>
-<p className="text-warning">Texto de aviso</p>
-<p className="text-destructive">Texto de erro</p>
-<p className="text-info">Texto informativo</p>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="grid grid-cols-2 gap-3 w-full">
           <p className="text-foreground">Texto padrão (foreground)</p>
@@ -105,19 +67,9 @@ export function TypographyShowcase() {
         title="Listas"
         description="Formatação de listas"
         category="Tipografia"
-        code={`// Lista não ordenada
-<ul className="list-disc list-inside space-y-1">
-  <li>Item 1</li>
-  <li>Item 2</li>
-  <li>Item 3</li>
-</ul>
-
-// Lista ordenada
-<ol className="list-decimal list-inside space-y-1">
-  <li>Primeiro passo</li>
-  <li>Segundo passo</li>
-  <li>Terceiro passo</li>
-</ol>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="grid grid-cols-2 gap-8 w-full">
           <div>
@@ -145,22 +97,9 @@ export function TypographyShowcase() {
         title="Blocos de Texto"
         description="Estilos especiais para destaque"
         category="Tipografia"
-        code={`// Bloco de exemplo (NORTE style)
-<div className="example-block">
-  <strong>Exemplo:</strong><br />
-  Botões com a mesma função devem manter mesma cor.
-</div>
-
-// Bloco de informação
-<div className="meta-block">
-  <strong>CÓDIGO:</strong> UID00001<br />
-  <strong>VERSÃO:</strong> 1.0
-</div>
-
-// Código inline
-<code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
-  código aqui
-</code>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-4 w-full">
           <div className="example-block">

@@ -4,6 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ComponentCard } from "./ComponentCard";
 import { User, Settings, Bell, Lock } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["tabs"];
+
 export function TabsShowcase() {
   return (
     <div className="space-y-6">
@@ -11,24 +15,9 @@ export function TabsShowcase() {
         title="Tabs Básicas"
         description="Navegação por abas para organizar conteúdo"
         category="Navegação"
-        code={`import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-<Tabs defaultValue="geral">
-  <TabsList>
-    <TabsTrigger value="geral">Geral</TabsTrigger>
-    <TabsTrigger value="seguranca">Segurança</TabsTrigger>
-    <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
-  </TabsList>
-  <TabsContent value="geral">
-    Conteúdo da aba Geral
-  </TabsContent>
-  <TabsContent value="seguranca">
-    Conteúdo da aba Segurança
-  </TabsContent>
-  <TabsContent value="notificacoes">
-    Conteúdo da aba Notificações
-  </TabsContent>
-</Tabs>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full">
           <Tabs defaultValue="geral" className="w-full">
@@ -90,25 +79,9 @@ export function TabsShowcase() {
         title="Tabs com Ícones"
         description="Abas com ícones para melhor identificação"
         category="Navegação"
-        code={`import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Settings, Bell, Lock } from "lucide-react";
-
-<Tabs defaultValue="perfil">
-  <TabsList>
-    <TabsTrigger value="perfil">
-      <User className="h-4 w-4 mr-2" />
-      Perfil
-    </TabsTrigger>
-    <TabsTrigger value="config">
-      <Settings className="h-4 w-4 mr-2" />
-      Configurações
-    </TabsTrigger>
-    <TabsTrigger value="alertas">
-      <Bell className="h-4 w-4 mr-2" />
-      Alertas
-    </TabsTrigger>
-  </TabsList>
-</Tabs>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full">
           <Tabs defaultValue="perfil">

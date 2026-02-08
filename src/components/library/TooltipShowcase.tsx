@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { ComponentCard } from "./ComponentCard";
 import { HelpCircle, Info, Settings, Copy } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["tooltip"];
+
 export function TooltipShowcase() {
   return (
     <div className="space-y-6">
@@ -11,18 +15,9 @@ export function TooltipShowcase() {
         title="Tooltip Básico"
         description="Dicas de contexto ao passar o mouse"
         category="Overlay"
-        code={`import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-<TooltipProvider>
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <Button variant="outline">Passe o mouse</Button>
-    </TooltipTrigger>
-    <TooltipContent>
-      <p>Texto de ajuda aqui</p>
-    </TooltipContent>
-  </Tooltip>
-</TooltipProvider>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <TooltipProvider>
           <div className="flex items-center gap-4">
@@ -52,13 +47,9 @@ export function TooltipShowcase() {
         title="Tooltip com Posições"
         description="Diferentes posições de exibição"
         category="Overlay"
-        code={`<Tooltip>
-  <TooltipTrigger asChild>
-    <Button>Trigger</Button>
-  </TooltipTrigger>
-  <TooltipContent side="top">Topo</TooltipContent>
-  {/* side: "top" | "right" | "bottom" | "left" */}
-</Tooltip>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <TooltipProvider>
           <div className="flex items-center gap-4">
@@ -102,18 +93,9 @@ export function TooltipShowcase() {
         title="Tooltip em Ícones"
         description="Ideal para botões de ação com ícone"
         category="Overlay"
-        code={`<TooltipProvider>
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <Button size="icon" variant="outline">
-        <Settings className="h-4 w-4" />
-      </Button>
-    </TooltipTrigger>
-    <TooltipContent>
-      <p>Configurações</p>
-    </TooltipContent>
-  </Tooltip>
-</TooltipProvider>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <TooltipProvider>
           <div className="flex items-center gap-2">

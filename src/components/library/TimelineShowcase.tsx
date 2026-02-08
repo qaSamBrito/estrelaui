@@ -15,6 +15,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["timeline"];
+
 export function TimelineShowcase() {
   const orderEvents = [
     { id: 1, title: "Pedido Confirmado", description: "Seu pedido foi recebido com sucesso", time: "10:30", date: "Hoje", icon: Check, status: "complete" },
@@ -37,46 +41,9 @@ export function TimelineShowcase() {
         title="Timeline de Pedido"
         description="Acompanhamento visual do status de um pedido"
         category="Timeline"
-        code={`import { Check, Package, Truck, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const events = [
-  { id: 1, title: "Pedido Confirmado", time: "10:30", status: "complete" },
-  { id: 2, title: "Pagamento Aprovado", time: "10:35", status: "complete" },
-  { id: 3, title: "Em Preparação", time: "14:00", status: "current" },
-  { id: 4, title: "Enviado", status: "pending" },
-  { id: 5, title: "Entregue", status: "pending" },
-];
-
-<div className="space-y-4">
-  {events.map((event, index) => (
-    <div key={event.id} className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div className={cn(
-          "h-10 w-10 rounded-full flex items-center justify-center",
-          event.status === "complete" ? "bg-success text-success-foreground" :
-          event.status === "current" ? "bg-primary text-primary-foreground" :
-          "bg-muted text-muted-foreground"
-        )}>
-          {event.status === "complete" ? <Check className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
-        </div>
-        {index < events.length - 1 && (
-          <div className={cn(
-            "w-0.5 h-16 mt-2",
-            event.status === "complete" ? "bg-success" : "bg-muted"
-          )} />
-        )}
-      </div>
-      <div className="pt-1">
-        <h4 className={cn(
-          "font-medium",
-          event.status === "pending" && "text-muted-foreground"
-        )}>{event.title}</h4>
-        {event.time && <p className="text-sm text-muted-foreground">{event.time}</p>}
-      </div>
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-0 w-full max-w-md">
           {orderEvents.map((event, index) => {
@@ -121,28 +88,9 @@ const events = [
         title="Log de Atividades"
         description="Histórico de ações dos usuários no sistema"
         category="Timeline"
-        code={`const activities = [
-  { user: "João Silva", action: "criou o documento", target: "Relatório Q4", time: "há 2 horas", avatar: "JS" },
-  { user: "Maria Santos", action: "comentou em", target: "Proposta Comercial", time: "há 3 horas", avatar: "MS" },
-];
-
-<div className="space-y-4">
-  {activities.map((activity, index) => (
-    <div key={index} className="flex gap-3">
-      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground font-medium shrink-0">
-        {activity.avatar}
-      </div>
-      <div className="flex-1">
-        <p className="text-sm">
-          <span className="font-medium">{activity.user}</span>
-          {" "}{activity.action}{" "}
-          <span className="font-medium text-primary">{activity.target}</span>
-        </p>
-        <p className="text-xs text-muted-foreground">{activity.time}</p>
-      </div>
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-4 w-full max-w-md">
           {activityLog.map((activity, index) => (
@@ -167,36 +115,9 @@ const events = [
         title="Timeline Horizontal"
         description="Linha do tempo em formato horizontal"
         category="Timeline"
-        code={`import { cn } from "@/lib/utils";
-
-const events = [
-  { id: 1, title: "Jan", subtitle: "Início", active: true },
-  { id: 2, title: "Mar", subtitle: "Fase 1", active: true },
-  { id: 3, title: "Jun", subtitle: "Fase 2", active: true },
-  { id: 4, title: "Set", subtitle: "Fase 3", active: false },
-  { id: 5, title: "Dez", subtitle: "Conclusão", active: false },
-];
-
-<div className="flex items-center justify-between w-full">
-  {events.map((event, index) => (
-    <div key={event.id} className="flex items-center flex-1">
-      <div className="flex flex-col items-center">
-        <div className={cn(
-          "h-4 w-4 rounded-full",
-          event.active ? "bg-primary" : "bg-muted"
-        )} />
-        <span className="mt-2 text-sm font-medium">{event.title}</span>
-        <span className="text-xs text-muted-foreground">{event.subtitle}</span>
-      </div>
-      {index < events.length - 1 && (
-        <div className={cn(
-          "h-0.5 flex-1 mx-2",
-          events[index + 1].active ? "bg-primary" : "bg-muted"
-        )} />
-      )}
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center justify-between w-full max-w-lg">
           {[
@@ -230,42 +151,9 @@ const events = [
         title="Timeline com Cards"
         description="Eventos detalhados em formato de cards"
         category="Timeline"
-        code={`import { FileText, MessageSquare, AlertCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-
-const events = [
-  { 
-    title: "Documento Criado", 
-    description: "Relatório financeiro Q4 2024 foi criado",
-    time: "10:30", 
-    icon: FileText, 
-    tag: "Documento" 
-  },
-  // ...
-];
-
-<div className="space-y-4">
-  {events.map((event, index) => (
-    <div key={index} className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <event.icon className="h-5 w-5 text-primary" />
-        </div>
-        {index < events.length - 1 && <div className="w-0.5 flex-1 mt-2 bg-border" />}
-      </div>
-      <div className="flex-1 bg-card border rounded-lg p-4 mb-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h4 className="font-medium">{event.title}</h4>
-            <p className="text-sm text-muted-foreground">{event.description}</p>
-          </div>
-          <Badge variant="secondary">{event.tag}</Badge>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">{event.time}</p>
-      </div>
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-0 w-full max-w-lg">
           {[

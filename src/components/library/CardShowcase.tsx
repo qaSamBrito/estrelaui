@@ -5,6 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { ComponentCard } from "./ComponentCard";
 import { MoreHorizontal, FileText, Users, TrendingUp, Calendar } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["card"];
+
 export function CardShowcase() {
   return (
     <div className="space-y-6">
@@ -12,17 +16,9 @@ export function CardShowcase() {
         title="Card Básico"
         description="Card simples para exibição de conteúdo"
         category="Layout"
-        code={`import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-<Card>
-  <CardHeader>
-    <CardTitle>Título do Card</CardTitle>
-    <CardDescription>Descrição breve do conteúdo</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <p>Conteúdo do card aqui.</p>
-  </CardContent>
-</Card>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Card className="w-full max-w-sm">
           <CardHeader>
@@ -39,22 +35,9 @@ export function CardShowcase() {
         title="Card com Footer"
         description="Card com área de ações no rodapé"
         category="Layout"
-        code={`import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-<Card>
-  <CardHeader>
-    <CardTitle>Confirmar Ação</CardTitle>
-    <CardDescription>Você tem certeza que deseja continuar?</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <p>Esta ação não pode ser desfeita.</p>
-  </CardContent>
-  <CardFooter className="flex justify-end gap-2">
-    <Button variant="outline">Cancelar</Button>
-    <Button>Confirmar</Button>
-  </CardFooter>
-</Card>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Card className="w-full max-w-sm">
           <CardHeader>
@@ -75,21 +58,9 @@ import { Button } from "@/components/ui/button";
         title="Card de Estatísticas"
         description="Card para exibição de métricas e KPIs"
         category="Layout"
-        code={`import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
-
-<Card>
-  <CardHeader className="flex flex-row items-center justify-between pb-2">
-    <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
-    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-  </CardHeader>
-  <CardContent>
-    <div className="text-2xl font-bold">R$ 45.231,89</div>
-    <p className="text-xs text-muted-foreground">
-      +20.1% em relação ao mês anterior
-    </p>
-  </CardContent>
-</Card>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           <Card>
@@ -129,21 +100,9 @@ import { TrendingUp } from "lucide-react";
         title="Card com Badge"
         description="Card com indicadores de status"
         category="Layout"
-        code={`import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-<Card>
-  <CardHeader className="flex flex-row items-center justify-between">
-    <div>
-      <CardTitle>Projeto Alpha</CardTitle>
-      <p className="text-sm text-muted-foreground">Última atualização: 2 dias atrás</p>
-    </div>
-    <Badge variant="default">Ativo</Badge>
-  </CardHeader>
-  <CardContent>
-    <p>Descrição do projeto...</p>
-  </CardContent>
-</Card>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Card className="w-full max-w-md">
           <CardHeader className="flex flex-row items-center justify-between">

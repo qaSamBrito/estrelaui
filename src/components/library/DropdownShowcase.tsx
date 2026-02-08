@@ -1,6 +1,10 @@
 import React from "react";
 import { ComponentCard } from "./ComponentCard";
 import { Button } from "@/components/ui/button";
+
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["dropdown"];
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,37 +32,9 @@ export function DropdownShowcase() {
         title="Dropdown de Ações"
         description="Menu suspenso para ações em itens"
         category="Overlay"
-        code={`import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
-
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button variant="ghost" size="icon">
-      <MoreHorizontal className="h-4 w-4" />
-    </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end">
-    <DropdownMenuItem>
-      <Eye className="mr-2 h-4 w-4" />
-      Visualizar
-    </DropdownMenuItem>
-    <DropdownMenuItem>
-      <Edit className="mr-2 h-4 w-4" />
-      Editar
-    </DropdownMenuItem>
-    <DropdownMenuSeparator />
-    <DropdownMenuItem className="text-destructive">
-      <Trash2 className="mr-2 h-4 w-4" />
-      Excluir
-    </DropdownMenuItem>
-  </DropdownMenuContent>
-</DropdownMenu>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center gap-4">
           <DropdownMenu>
@@ -125,26 +101,9 @@ import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
         title="Dropdown com Checkboxes"
         description="Menu com opções de seleção múltipla"
         category="Overlay"
-        code={`import {
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button variant="outline">Colunas</Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuCheckboxItem checked>
-      Nome
-    </DropdownMenuCheckboxItem>
-    <DropdownMenuCheckboxItem checked>
-      Email
-    </DropdownMenuCheckboxItem>
-    <DropdownMenuCheckboxItem>
-      Telefone
-    </DropdownMenuCheckboxItem>
-  </DropdownMenuContent>
-</DropdownMenu>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

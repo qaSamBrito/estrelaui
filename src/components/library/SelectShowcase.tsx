@@ -12,6 +12,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { ComponentCard } from "./ComponentCard";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["select"];
+
 export function SelectShowcase() {
   return (
     <div className="space-y-6">
@@ -19,28 +23,9 @@ export function SelectShowcase() {
         title="Select / Dropdown"
         description="Menu de seleção para escolhas únicas"
         category="Formulários"
-        code={`import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-
-<div className="space-y-2">
-  <Label htmlFor="status">Status *</Label>
-  <Select>
-    <SelectTrigger>
-      <SelectValue placeholder="Selecione o status" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="ativo">Ativo</SelectItem>
-      <SelectItem value="inativo">Inativo</SelectItem>
-      <SelectItem value="pendente">Pendente</SelectItem>
-    </SelectContent>
-  </Select>
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-sm space-y-2">
           <Label htmlFor="status">Status *</Label>
@@ -61,19 +46,9 @@ import { Label } from "@/components/ui/label";
         title="Checkbox"
         description="Para seleções múltiplas ou confirmações"
         category="Formulários"
-        code={`import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-
-<div className="flex items-center space-x-2">
-  <Checkbox id="terms" />
-  <Label htmlFor="terms">Aceito os termos e condições</Label>
-</div>
-
-// Checkbox marcado
-<div className="flex items-center space-x-2">
-  <Checkbox id="newsletter" defaultChecked />
-  <Label htmlFor="newsletter">Receber newsletter</Label>
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -101,19 +76,9 @@ import { Label } from "@/components/ui/label";
         title="Radio Group"
         description="Para seleção única entre opções"
         category="Formulários"
-        code={`import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-
-<RadioGroup defaultValue="option-1">
-  <div className="flex items-center space-x-2">
-    <RadioGroupItem value="option-1" id="option-1" />
-    <Label htmlFor="option-1">Opção 1</Label>
-  </div>
-  <div className="flex items-center space-x-2">
-    <RadioGroupItem value="option-2" id="option-2" />
-    <Label htmlFor="option-2">Opção 2</Label>
-  </div>
-</RadioGroup>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <RadioGroup defaultValue="mensal" className="space-y-3">
           <div className="flex items-center space-x-2">
@@ -135,13 +100,9 @@ import { Label } from "@/components/ui/label";
         title="Switch"
         description="Para alternar entre estados on/off"
         category="Formulários"
-        code={`import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-
-<div className="flex items-center space-x-2">
-  <Switch id="notifications" />
-  <Label htmlFor="notifications">Ativar notificações</Label>
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between w-full max-w-sm">

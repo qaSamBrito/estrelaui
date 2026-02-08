@@ -78,6 +78,15 @@
     --sidebar-ring: 202 59% 48%;
   }
 
+  /* Modo daltônico - UID00001-2026: paleta com alto contraste e distinção por forma/saturação */
+  [data-daltonic="true"] {
+    --success: 220 90% 45%;
+    --destructive: 0 90% 55%;
+    --warning: 45 100% 50%;
+    --primary: 220 80% 35%;
+    --accent: 280 70% 45%;
+  }
+
   .dark {
     --background: 210 29% 8%;
     --foreground: 210 20% 98%;

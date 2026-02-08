@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { ComponentCard } from "./ComponentCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["sidebar"];
 import { 
   Home, FileText, Users, Settings, BarChart, Calendar,
   ChevronLeft, ChevronRight, LogOut, HelpCircle, Bell,
@@ -32,55 +36,9 @@ export function SidebarShowcase() {
         title="Menu Lateral"
         description="Menu lateral com ícones e texto - hierarquia visual definida"
         category="Navegação"
-        code={`import { cn } from "@/lib/utils";
-import { Home, FileText, Users, Settings, ChevronLeft, ChevronRight } from "lucide-react";
-
-const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: Home },
-  { id: "documentos", label: "Documentos", icon: FileText },
-  { id: "usuarios", label: "Usuários", icon: Users },
-  { id: "configuracoes", label: "Configurações", icon: Settings },
-];
-
-<aside className={cn(
-  "h-screen border-r bg-sidebar transition-all duration-300",
-  collapsed ? "w-16" : "w-64"
-)}>
-  <div className="flex flex-col h-full">
-    {/* Logo */}
-    <div className="h-16 border-b flex items-center justify-center">
-      <span className={cn("font-bold text-xl", collapsed && "hidden")}>
-        NORTE
-      </span>
-    </div>
-    
-    {/* Menu Items */}
-    <nav className="flex-1 p-2 space-y-1">
-      {menuItems.map((item) => (
-        <button
-          key={item.id}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-            activeItem === item.id 
-              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-              : "hover:bg-sidebar-accent/50"
-          )}
-        >
-          <item.icon className="h-5 w-5 shrink-0" />
-          {!collapsed && <span>{item.label}</span>}
-        </button>
-      ))}
-    </nav>
-    
-    {/* Collapse Toggle */}
-    <button 
-      onClick={() => setCollapsed(!collapsed)}
-      className="h-12 border-t flex items-center justify-center hover:bg-sidebar-accent/50"
-    >
-      {collapsed ? <ChevronRight /> : <ChevronLeft />}
-    </button>
-  </div>
-</aside>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full flex gap-4">
           <aside className={cn(

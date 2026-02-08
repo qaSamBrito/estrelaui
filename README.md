@@ -50,6 +50,11 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Testes
+
+- **Unitários (Vitest):** `npm run test` — testes da lógica do gerador (`generatorSpec`) e da página Generator.
+- **E2E (Playwright):** `npm run test:e2e` — fluxo completo do Gerador (página inicial, nova geração, validação, fluxo feliz). O Playwright sobe o servidor de desenvolvimento automaticamente; para rodar com o app já aberto, use `npm run dev` em um terminal e `npm run test:e2e` em outro.
+
 ## What technologies are used for this project?
 
 This project is built with:

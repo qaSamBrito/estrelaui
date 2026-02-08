@@ -25,6 +25,10 @@ import { Label } from "@/components/ui/label";
 import { ComponentCard } from "./ComponentCard";
 import { Trash2, Plus } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["dialog"];
+
 export function DialogShowcase() {
   return (
     <div className="space-y-6">
@@ -32,29 +36,9 @@ export function DialogShowcase() {
         title="Dialog Básico"
         description="Modal para formulários e conteúdo"
         category="Overlay"
-        code={`import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-<Dialog>
-  <DialogTrigger asChild>
-    <Button>Abrir Dialog</Button>
-  </DialogTrigger>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Título do Dialog</DialogTitle>
-      <DialogDescription>
-        Descrição do conteúdo do dialog.
-      </DialogDescription>
-    </DialogHeader>
-    {/* Conteúdo aqui */}
-  </DialogContent>
-</Dialog>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Dialog>
           <DialogTrigger asChild>
@@ -89,38 +73,9 @@ export function DialogShowcase() {
         title="Dialog de Confirmação"
         description="Para ações destrutivas que requerem confirmação"
         category="Overlay"
-        code={`import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-<AlertDialog>
-  <AlertDialogTrigger asChild>
-    <Button variant="destructive">Excluir</Button>
-  </AlertDialogTrigger>
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-      <AlertDialogDescription>
-        Esta ação não pode ser desfeita. Isso irá excluir 
-        permanentemente o registro.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-      <AlertDialogAction className="bg-destructive hover:bg-destructive/90">
-        Sim, excluir
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <AlertDialog>
           <AlertDialogTrigger asChild>

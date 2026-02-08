@@ -3,6 +3,10 @@ import { Progress } from "@/components/ui/progress";
 import { ComponentCard } from "./ComponentCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["progress"];
+
 export function ProgressShowcase() {
   return (
     <div className="space-y-6">
@@ -10,19 +14,9 @@ export function ProgressShowcase() {
         title="Barra de Progresso"
         description="Indicador de progresso para operações longas"
         category="Feedback"
-        code={`import { Progress } from "@/components/ui/progress";
-
-// Progresso básico
-<Progress value={33} />
-
-// Com porcentagem
-<div className="space-y-2">
-  <div className="flex justify-between text-sm">
-    <span>Upload em progresso</span>
-    <span>66%</span>
-  </div>
-  <Progress value={66} />
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-md space-y-6">
           <div className="space-y-2">
@@ -60,26 +54,9 @@ export function ProgressShowcase() {
         title="Skeleton Loading"
         description="Placeholder para conteúdo em carregamento"
         category="Feedback"
-        code={`import { Skeleton } from "@/components/ui/skeleton";
-
-// Skeleton básico
-<Skeleton className="h-4 w-[250px]" />
-
-// Card skeleton
-<div className="flex items-center space-x-4">
-  <Skeleton className="h-12 w-12 rounded-full" />
-  <div className="space-y-2">
-    <Skeleton className="h-4 w-[200px]" />
-    <Skeleton className="h-4 w-[150px]" />
-  </div>
-</div>
-
-// Skeleton de tabela
-<div className="space-y-2">
-  <Skeleton className="h-8 w-full" />
-  <Skeleton className="h-8 w-full" />
-  <Skeleton className="h-8 w-full" />
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-md space-y-8">
           {/* Card skeleton */}
@@ -111,14 +88,9 @@ export function ProgressShowcase() {
         title="Spinner de Loading"
         description="Indicador de carregamento circular"
         category="Feedback"
-        code={`// Spinner simples com Tailwind
-<div className="flex items-center gap-2">
-  <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-  <span>Carregando...</span>
-</div>
-
-// Spinner maior
-<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center gap-8">
           <div className="flex flex-col items-center gap-2">

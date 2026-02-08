@@ -10,6 +10,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Home, ChevronRight } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["breadcrumb"];
+
 export function BreadcrumbShowcase() {
   return (
     <div className="space-y-6">
@@ -17,30 +21,9 @@ export function BreadcrumbShowcase() {
         title="Breadcrumb Básico"
         description="Navegação hierárquica para orientação do usuário"
         category="Navegação"
-        code={`import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-
-<Breadcrumb>
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/">Início</BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/documentos">Documentos</BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbPage>Detalhes</BreadcrumbPage>
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Breadcrumb>
           <BreadcrumbList>
@@ -63,28 +46,9 @@ export function BreadcrumbShowcase() {
         title="Breadcrumb com Ícone"
         description="Com ícone de home para o início"
         category="Navegação"
-        code={`<Breadcrumb>
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/" className="flex items-center gap-1">
-        <Home className="h-4 w-4" />
-        <span className="sr-only">Início</span>
-      </BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/projetos">Projetos</BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink href="/projetos/alpha">Projeto Alpha</BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbPage>Configurações</BreadcrumbPage>
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <Breadcrumb>
           <BreadcrumbList>

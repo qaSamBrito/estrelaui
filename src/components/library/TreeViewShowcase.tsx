@@ -3,6 +3,10 @@ import { ComponentCard } from "./ComponentCard";
 import { ChevronRight, ChevronDown, Folder, FolderOpen, File, FileText, Image, Code } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["treeview"];
+
 interface TreeNode {
   id: string;
   name: string;
@@ -153,60 +157,9 @@ export function TreeViewShowcase() {
         title="Tree View - Explorador de Arquivos"
         description="Estrutura hierárquica navegável para pastas e arquivos"
         category="Hierarquia"
-        code={`import { useState } from "react";
-import { ChevronRight, ChevronDown, Folder, FolderOpen, File } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-interface TreeNode {
-  id: string;
-  name: string;
-  type: "folder" | "file";
-  children?: TreeNode[];
-}
-
-const [expanded, setExpanded] = useState<Set<string>>(new Set(["1"]));
-const [selected, setSelected] = useState<string | null>(null);
-
-const toggleExpand = (id: string) => {
-  setExpanded((prev) => {
-    const next = new Set(prev);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    return next;
-  });
-};
-
-function TreeNode({ node, level = 0 }) {
-  const isExpanded = expanded.has(node.id);
-  const Icon = node.type === "folder" 
-    ? (isExpanded ? FolderOpen : Folder) 
-    : File;
-  
-  return (
-    <div>
-      <div
-        className={cn(
-          "flex items-center gap-1 py-1 px-2 rounded-md cursor-pointer hover:bg-accent",
-          selected === node.id && "bg-accent"
-        )}
-        style={{ paddingLeft: \`\${level * 16 + 8}px\` }}
-        onClick={() => {
-          setSelected(node.id);
-          if (node.type === "folder") toggleExpand(node.id);
-        }}
-      >
-        {node.type === "folder" && (
-          isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-        )}
-        <Icon className="h-4 w-4" />
-        <span className="text-sm">{node.name}</span>
-      </div>
-      {isExpanded && node.children?.map((child) => (
-        <TreeNode key={child.id} node={child} level={level + 1} />
-      ))}
-    </div>
-  );
-}`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-sm border rounded-lg p-2 bg-card">
           {fileTree.map((node) => (
@@ -226,39 +179,9 @@ function TreeNode({ node, level = 0 }) {
         title="Tree View - Categorias"
         description="Estrutura para categorias e subcategorias"
         category="Hierarquia"
-        code={`const categories = [
-  {
-    id: "1",
-    name: "Eletrônicos",
-    children: [
-      { id: "1.1", name: "Smartphones", count: 156 },
-      { id: "1.2", name: "Notebooks", count: 89 },
-      { id: "1.3", name: "Tablets", count: 45 },
-    ],
-  },
-  // ...
-];
-
-<div className="space-y-1">
-  {categories.map((category) => (
-    <div key={category.id}>
-      <button className="flex items-center justify-between w-full py-2 px-3 rounded-md hover:bg-accent">
-        <div className="flex items-center gap-2">
-          <ChevronRight className="h-4 w-4" />
-          <span className="font-medium">{category.name}</span>
-        </div>
-      </button>
-      <div className="ml-6 space-y-1">
-        {category.children?.map((sub) => (
-          <button key={sub.id} className="flex items-center justify-between w-full py-1.5 px-3 rounded-md hover:bg-accent text-sm">
-            <span>{sub.name}</span>
-            <span className="text-muted-foreground">({sub.count})</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-sm border rounded-lg p-2 bg-card">
           {[
@@ -318,34 +241,9 @@ function TreeNode({ node, level = 0 }) {
         title="Tree View com Checkboxes"
         description="Seleção múltipla em estrutura hierárquica"
         category="Hierarquia"
-        code={`import { Checkbox } from "@/components/ui/checkbox";
-
-const items = [
-  { id: "1", name: "Todos os Departamentos", children: [
-    { id: "1.1", name: "Recursos Humanos" },
-    { id: "1.2", name: "Financeiro" },
-    { id: "1.3", name: "Tecnologia" },
-  ]},
-];
-
-<div className="space-y-2">
-  {items.map((item) => (
-    <div key={item.id}>
-      <div className="flex items-center gap-2 py-1">
-        <Checkbox id={item.id} />
-        <label htmlFor={item.id} className="font-medium">{item.name}</label>
-      </div>
-      <div className="ml-6 space-y-2">
-        {item.children?.map((child) => (
-          <div key={child.id} className="flex items-center gap-2 py-1">
-            <Checkbox id={child.id} />
-            <label htmlFor={child.id}>{child.name}</label>
-          </div>
-        ))}
-      </div>
-    </div>
-  ))}
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-sm border rounded-lg p-4 bg-card space-y-2">
           <div className="flex items-center gap-2 py-1">

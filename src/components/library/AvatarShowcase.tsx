@@ -3,6 +3,10 @@ import { ComponentCard } from "./ComponentCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["avatar"];
+
 export function AvatarShowcase() {
   return (
     <div className="space-y-6">
@@ -10,18 +14,9 @@ export function AvatarShowcase() {
         title="Avatar Básico"
         description="Representação visual de usuários"
         category="Display"
-        code={`import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Com imagem
-<Avatar>
-  <AvatarImage src="https://github.com/shadcn.png" alt="@usuario" />
-  <AvatarFallback>JS</AvatarFallback>
-</Avatar>
-
-// Apenas fallback (iniciais)
-<Avatar>
-  <AvatarFallback>JS</AvatarFallback>
-</Avatar>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center gap-4">
           <Avatar>
@@ -44,25 +39,9 @@ export function AvatarShowcase() {
         title="Tamanhos de Avatar"
         description="Diferentes tamanhos para contextos variados"
         category="Display"
-        code={`// Pequeno
-<Avatar className="h-8 w-8">
-  <AvatarFallback className="text-xs">JS</AvatarFallback>
-</Avatar>
-
-// Médio (padrão)
-<Avatar className="h-10 w-10">
-  <AvatarFallback>JS</AvatarFallback>
-</Avatar>
-
-// Grande
-<Avatar className="h-14 w-14">
-  <AvatarFallback className="text-lg">JS</AvatarFallback>
-</Avatar>
-
-// Extra grande
-<Avatar className="h-20 w-20">
-  <AvatarFallback className="text-2xl">JS</AvatarFallback>
-</Avatar>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-end gap-4">
           <div className="text-center">
@@ -96,20 +75,9 @@ export function AvatarShowcase() {
         title="Grupo de Avatares"
         description="Stack de avatares para representar grupos"
         category="Display"
-        code={`<div className="flex -space-x-2">
-  <Avatar className="border-2 border-background">
-    <AvatarFallback>A</AvatarFallback>
-  </Avatar>
-  <Avatar className="border-2 border-background">
-    <AvatarFallback>B</AvatarFallback>
-  </Avatar>
-  <Avatar className="border-2 border-background">
-    <AvatarFallback>C</AvatarFallback>
-  </Avatar>
-  <Avatar className="border-2 border-background">
-    <AvatarFallback className="text-xs">+5</AvatarFallback>
-  </Avatar>
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex -space-x-2">
           <Avatar className="border-2 border-background">
@@ -131,12 +99,9 @@ export function AvatarShowcase() {
         title="Avatar com Status"
         description="Indicador de status online/offline"
         category="Display"
-        code={`<div className="relative">
-  <Avatar>
-    <AvatarFallback>JS</AvatarFallback>
-  </Avatar>
-  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-success border-2 border-background" />
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center gap-6">
           <div className="relative">

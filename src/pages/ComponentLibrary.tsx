@@ -1,15 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Search, 
-  Square, 
-  FormInput, 
-  Bell, 
-  LayoutGrid, 
-  Table2, 
-  MessageSquare, 
+import {
+  Search,
+  Square,
+  FormInput,
+  Bell,
+  LayoutGrid,
+  Table2,
+  MessageSquare,
   Navigation,
   Palette,
   Type,
@@ -24,11 +23,11 @@ import {
   Info,
   Download,
   FileText,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { generateComponentsZip, generateMarkdownDoc } from "@/lib/componentExport";
+import { generateComponentsZip, generateMarkdownDoc, componentDataById } from "@/lib/componentExport";
 import { saveAs } from "file-saver";
 import { ButtonShowcase } from "@/components/library/ButtonShowcase";
 import { InputShowcase } from "@/components/library/InputShowcase";
@@ -86,79 +85,125 @@ const categories = [
   { id: "icones", label: "Ícones", icon: Image },
 ];
 
-const components = [
+type ComponentItem = {
+  id: string;
+  name: string;
+  category: string;
+  component: React.ComponentType;
+  exportId: string | null;
+  subtitle?: string;
+};
+const components: ComponentItem[] = [
   // Design System
-  { id: "colors", name: "Cores e Gradientes", category: "design", component: ColorsShowcase },
-  { id: "colorpicker", name: "Color Picker", category: "design", component: ColorPickerShowcase },
+  { id: "colors", name: "Cores e Gradientes", category: "design", component: ColorsShowcase, exportId: "colors", subtitle: "Cores Principais" },
+  { id: "colorpicker", name: "Color Picker", category: "design", component: ColorPickerShowcase, exportId: "colorpicker", subtitle: "Presets e customização" },
   
   // Tipografia
-  { id: "typography", name: "Tipografia", category: "tipografia", component: TypographyShowcase },
+  { id: "typography", name: "Tipografia", category: "tipografia", component: TypographyShowcase, exportId: "typography" },
   
   // Botões
-  { id: "buttons", name: "Botões", category: "botoes", component: ButtonShowcase },
-  { id: "splitbutton", name: "Split Button", category: "botoes", component: SplitButtonShowcase },
+  { id: "buttons", name: "Botões", category: "botoes", component: ButtonShowcase, exportId: "button" },
+  { id: "splitbutton", name: "Split Button", category: "botoes", component: SplitButtonShowcase, exportId: "splitbutton" },
   
   // Formulários
-  { id: "inputs", name: "Inputs e Campos", category: "formularios", component: InputShowcase },
-  { id: "select", name: "Select e Checkboxes", category: "formularios", component: SelectShowcase },
-  { id: "rangeslider", name: "Range Slider", category: "formularios", component: RangeSliderShowcase },
-  { id: "rating", name: "Rating / Avaliação", category: "formularios", component: RatingShowcase },
+  { id: "inputs", name: "Inputs e Campos", category: "formularios", component: InputShowcase, exportId: "input" },
+  { id: "select", name: "Select e Checkboxes", category: "formularios", component: SelectShowcase, exportId: "select" },
+  { id: "rangeslider", name: "Range Slider", category: "formularios", component: RangeSliderShowcase, exportId: "rangeslider" },
+  { id: "rating", name: "Rating / Avaliação", category: "formularios", component: RatingShowcase, exportId: "rating" },
   
   // Data & Hora
-  { id: "datetime", name: "Date & Time Picker", category: "datatime", component: DateTimeShowcase },
+  { id: "datetime", name: "Date & Time Picker", category: "datatime", component: DateTimeShowcase, exportId: "calendar" },
   
   // Arquivos & Mídia
-  { id: "fileupload", name: "File Upload", category: "arquivos", component: FileUploadShowcase },
+  { id: "fileupload", name: "File Upload", category: "arquivos", component: FileUploadShowcase, exportId: "fileupload" },
   
   // Tags & Categorias
-  { id: "badges", name: "Badges", category: "tags", component: BadgeShowcase },
-  { id: "chips", name: "Chips / Tags", category: "tags", component: ChipShowcase },
+  { id: "badges", name: "Badges", category: "tags", component: BadgeShowcase, exportId: "badge" },
+  { id: "chips", name: "Chips / Tags", category: "tags", component: ChipShowcase, exportId: "chips" },
   
   // Layout
-  { id: "cards", name: "Cards", category: "layout", component: CardShowcase },
-  { id: "header", name: "Header", category: "layout", component: HeaderShowcase },
-  { id: "avatars", name: "Avatares", category: "layout", component: AvatarShowcase },
+  { id: "cards", name: "Cards", category: "layout", component: CardShowcase, exportId: "card" },
+  { id: "header", name: "Header", category: "layout", component: HeaderShowcase, exportId: "header" },
+  { id: "avatars", name: "Avatares", category: "layout", component: AvatarShowcase, exportId: "avatar" },
   
   // Navegação
-  { id: "sidebar", name: "Menu Lateral", category: "navegacao", component: SidebarShowcase },
-  { id: "breadcrumb", name: "Breadcrumb", category: "navegacao", component: BreadcrumbShowcase },
-  { id: "tabs", name: "Tabs", category: "navegacao", component: TabsShowcase },
-  { id: "pagination", name: "Paginação", category: "navegacao", component: PaginationShowcase },
-  { id: "treeview", name: "Tree View", category: "navegacao", component: TreeViewShowcase },
+  { id: "sidebar", name: "Menu Lateral", category: "navegacao", component: SidebarShowcase, exportId: "sidebar" },
+  { id: "breadcrumb", name: "Breadcrumb", category: "navegacao", component: BreadcrumbShowcase, exportId: "breadcrumb" },
+  { id: "tabs", name: "Tabs", category: "navegacao", component: TabsShowcase, exportId: "tabs" },
+  { id: "pagination", name: "Paginação", category: "navegacao", component: PaginationShowcase, exportId: "pagination" },
+  { id: "treeview", name: "Tree View", category: "navegacao", component: TreeViewShowcase, exportId: "treeview" },
   
   // Fluxo & Progresso
-  { id: "stepper", name: "Stepper / Steps", category: "fluxo", component: StepperShowcase },
-  { id: "timeline", name: "Timeline", category: "fluxo", component: TimelineShowcase },
-  { id: "progress", name: "Progress Bar", category: "fluxo", component: ProgressShowcase },
+  { id: "stepper", name: "Stepper / Steps", category: "fluxo", component: StepperShowcase, exportId: "stepper" },
+  { id: "timeline", name: "Timeline", category: "fluxo", component: TimelineShowcase, exportId: "timeline" },
+  { id: "progress", name: "Progress Bar", category: "fluxo", component: ProgressShowcase, exportId: "progress" },
   
   // Feedback
-  { id: "alerts", name: "Alertas", category: "feedback", component: AlertShowcase },
-  { id: "notification", name: "Notificações", category: "feedback", component: NotificationBellShowcase },
+  { id: "alerts", name: "Alertas", category: "feedback", component: AlertShowcase, exportId: "alert" },
+  { id: "notification", name: "Notificações", category: "feedback", component: NotificationBellShowcase, exportId: "notification" },
   
   // Dados
-  { id: "tables", name: "Tabelas", category: "dados", component: TableShowcase },
+  { id: "tables", name: "Tabelas", category: "dados", component: TableShowcase, exportId: "table" },
   
   // Overlay
-  { id: "dialogs", name: "Dialogs e Modais", category: "overlay", component: DialogShowcase },
-  { id: "dropdowns", name: "Dropdowns", category: "overlay", component: DropdownShowcase },
-  { id: "tooltips", name: "Tooltips", category: "overlay", component: TooltipShowcase },
+  { id: "dialogs", name: "Dialogs e Modais", category: "overlay", component: DialogShowcase, exportId: "dialog" },
+  { id: "dropdowns", name: "Dropdowns", category: "overlay", component: DropdownShowcase, exportId: "dropdown" },
+  { id: "tooltips", name: "Tooltips", category: "overlay", component: TooltipShowcase, exportId: "tooltip" },
   
   // Utilitários
-  { id: "copytoclipboard", name: "Copy to Clipboard", category: "utilitarios", component: CopyToClipboardShowcase },
+  { id: "copytoclipboard", name: "Copy to Clipboard", category: "utilitarios", component: CopyToClipboardShowcase, exportId: "copytoclipboard" },
   
   // Loading
-  { id: "loaders", name: "Loaders & Spinners", category: "loading", component: LoaderShowcase },
+  { id: "loaders", name: "Loaders & Spinners", category: "loading", component: LoaderShowcase, exportId: "loaders" },
   
   // Ícones
-  { id: "icons", name: "Galeria de Ícones", category: "icones", component: IconGallery },
+  { id: "icons", name: "Galeria de Ícones", category: "icones", component: IconGallery, exportId: "icons" },
 ];
 
+/** Mapa exportId (componentExport) -> id da seção na biblioteca. Usado para links âncora em /#sectionId */
+export const exportIdToSectionId: Record<string, string> = components.reduce(
+  (acc, c) => {
+    if (c.exportId) acc[c.exportId] = c.id;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+/** Mapa exportId -> id da categoria (menu da biblioteca). Usado para link ?categoria=... */
+export const exportIdToCategoryId: Record<string, string> = components.reduce(
+  (acc, c) => {
+    if (c.exportId) acc[c.exportId] = c.category;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+const VALID_CATEGORIES = new Set(categories.map((c) => c.id));
+
 export default function ComponentLibrary() {
+  const location = useLocation();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("todos");
   const [expandedComponent, setExpandedComponent] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+
+  // Ao chegar via link (ex: /?categoria=botoes#buttons), define categoria e rola até a seção
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("categoria");
+    if (cat && VALID_CATEGORIES.has(cat)) {
+      setActiveCategory(cat);
+    }
+    const hash = location.hash?.replace("#", "");
+    if (hash) {
+      const scrollToSection = () => {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+      requestAnimationFrame(() => setTimeout(scrollToSection, 150));
+    }
+  }, [location.search, location.hash]);
 
   const filteredComponents = useMemo(() => {
     return components.filter((comp) => {
@@ -224,32 +269,22 @@ export default function ComponentLibrary() {
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden md:inline">{components.length} componentes</span>
-            
-            <Button variant="outline" size="sm" asChild className="hidden sm:flex">
+          <div className="ml-auto flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">{filteredComponents.length} {filteredComponents.length === 1 ? "componente" : "componentes"}</span>
+
+            <Button variant="outline" size="sm" asChild>
               <Link to="/exemplo">
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Ver Exemplo
+                Ver exemplo
               </Link>
             </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleDownloadMarkdown}
-              className="hidden sm:flex"
-            >
+
+            <Button variant="outline" size="sm" onClick={handleDownloadMarkdown}>
               <FileText className="h-4 w-4 mr-2" />
               .MD
             </Button>
-            
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={handleDownloadZip}
-              disabled={isExporting}
-            >
+
+            <Button variant="default" size="sm" onClick={handleDownloadZip} disabled={isExporting}>
               {isExporting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -257,13 +292,11 @@ export default function ComponentLibrary() {
               )}
               ZIP
             </Button>
-            
+
             <ThemeToggle />
-            
-            <Button variant="outline" size="sm" asChild className="hidden lg:flex">
-              <a href="https://lucide.dev/icons/" target="_blank" rel="noopener noreferrer">
-                Todos os Ícones Lucide
-              </a>
+
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/gerador">Backoffice</Link>
             </Button>
           </div>
         </div>
@@ -283,24 +316,21 @@ export default function ComponentLibrary() {
           </div>
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs - quebra de linha para não ocultar itens */}
         <div className="mb-8">
-          <ScrollArea className="w-full">
-            <div className="flex gap-2 pb-2">
-              {categories.map((cat) => (
-                <Button
-                  key={cat.id}
-                  variant={activeCategory === cat.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveCategory(cat.id)}
-                  className="shrink-0"
-                >
-                  <cat.icon className="h-4 w-4 mr-2" />
-                  {cat.label}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="flex flex-wrap gap-2 pb-2">
+            {categories.map((cat) => (
+              <Button
+                key={cat.id}
+                variant={activeCategory === cat.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(cat.id)}
+              >
+                <cat.icon className="h-4 w-4 mr-2" />
+                {cat.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Components */}
@@ -309,17 +339,31 @@ export default function ComponentLibrary() {
             {filteredComponents.map((comp) => {
               const Component = comp.component;
               const isExpanded = expandedComponent === comp.id || expandedComponent === null;
-              
+              const exportData = comp.exportId ? componentDataById[comp.exportId] : null;
+
               return (
                 <section key={comp.id} className="scroll-mt-20" id={comp.id}>
-                  <button
-                    onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
-                    className="flex items-center gap-2 mb-4 group cursor-pointer"
-                  >
-                    <h2 className="text-2xl font-semibold text-secondary">{comp.name}</h2>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${!isExpanded ? '-rotate-90' : ''}`} />
-                  </button>
-                  {isExpanded && <Component />}
+                  <div className="mb-4">
+                    <button
+                      onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
+                      className="flex items-center gap-2 group cursor-pointer w-full min-w-0 text-left"
+                    >
+                      <h2 className="text-2xl font-semibold text-secondary truncate">{comp.name}</h2>
+                      <ChevronDown className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform ${!isExpanded ? "-rotate-90" : ""}`} />
+                    </button>
+                    {(comp.subtitle || exportData) && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-muted-foreground">
+                          {comp.subtitle ?? exportData?.category ?? ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {isExpanded && (
+                    <div className="space-y-4">
+                      <Component />
+                    </div>
+                  )}
                 </section>
               );
             })}

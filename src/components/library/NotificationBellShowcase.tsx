@@ -12,6 +12,10 @@ import {
 import { Bell, Check, Trash2, Settings, X, MessageSquare, Calendar, AlertCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["notification"];
+
 export function NotificationBellShowcase() {
   const [unreadCount, setUnreadCount] = useState(5);
   const [notifications, setNotifications] = useState([
@@ -42,54 +46,9 @@ export function NotificationBellShowcase() {
         title="Sino de Notificações"
         description="Ícone de notificação com contador e dropdown"
         category="Notificações"
-        code={`import { useState } from "react";
-import { Bell, Check, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu";
-
-const [unreadCount, setUnreadCount] = useState(5);
-
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button variant="ghost" size="icon" className="relative">
-      <Bell className="h-5 w-5" />
-      {unreadCount > 0 && (
-        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-          {unreadCount}
-        </Badge>
-      )}
-    </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end" className="w-80">
-    <div className="flex items-center justify-between p-2 border-b">
-      <span className="font-semibold">Notificações</span>
-      <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-        <Check className="h-4 w-4 mr-1" />
-        Marcar como lidas
-      </Button>
-    </div>
-    {notifications.map((notification) => (
-      <DropdownMenuItem key={notification.id} className="flex items-start gap-3 p-3">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-          <NotificationIcon className="h-4 w-4 text-primary" />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium">{notification.title}</p>
-          <p className="text-xs text-muted-foreground">{notification.description}</p>
-          <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
-        </div>
-        {!notification.read && <div className="h-2 w-2 rounded-full bg-primary" />}
-      </DropdownMenuItem>
-    ))}
-  </DropdownMenuContent>
-</DropdownMenu>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -140,30 +99,9 @@ const [unreadCount, setUnreadCount] = useState(5);
         title="Badge de Notificação - Variantes"
         description="Diferentes estilos de contador de notificações"
         category="Notificações"
-        code={`import { Bell, Mail, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-// Contador numérico
-<Button variant="ghost" size="icon" className="relative">
-  <Bell className="h-5 w-5" />
-  <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs">
-    12
-  </Badge>
-</Button>
-
-// Ponto indicador
-<Button variant="ghost" size="icon" className="relative">
-  <Bell className="h-5 w-5" />
-  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-destructive" />
-</Button>
-
-// Ponto com animação
-<Button variant="ghost" size="icon" className="relative">
-  <Bell className="h-5 w-5" />
-  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-destructive animate-ping" />
-  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-destructive" />
-</Button>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="flex items-center gap-6">
           {/* Contador numérico */}
@@ -213,21 +151,9 @@ import { Badge } from "@/components/ui/badge";
         title="Notificação Toast Inline"
         description="Notificação inline que pode ser dispensada"
         category="Notificações"
-        code={`import { X, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-<div className="flex items-start gap-3 p-4 bg-info/10 border border-info/30 rounded-lg">
-  <AlertCircle className="h-5 w-5 text-info shrink-0 mt-0.5" />
-  <div className="flex-1">
-    <p className="font-medium text-sm">Nova atualização disponível</p>
-    <p className="text-sm text-muted-foreground">
-      Uma nova versão do sistema está disponível. Clique para atualizar.
-    </p>
-  </div>
-  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
-    <X className="h-4 w-4" />
-  </Button>
-</div>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full max-w-md space-y-3">
           <div className="flex items-start gap-3 p-4 bg-info/10 border border-info/30 rounded-lg">

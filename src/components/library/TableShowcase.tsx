@@ -5,6 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { ComponentCard } from "./ComponentCard";
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 
+import { componentDataById } from "@/lib/componentExport";
+
+const exportData = componentDataById["table"];
+
 export function TableShowcase() {
   const data = [
     { id: "001", nome: "João Silva", email: "joao@empresa.com", status: "Ativo", cargo: "Desenvolvedor" },
@@ -18,24 +22,9 @@ export function TableShowcase() {
         title="Tabela Básica"
         description="Tabela simples para exibição de dados"
         category="Dados"
-        code={`import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-<Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead>Nome</TableHead>
-      <TableHead>Email</TableHead>
-      <TableHead>Status</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow>
-      <TableCell>João Silva</TableCell>
-      <TableCell>joao@empresa.com</TableCell>
-      <TableCell>Ativo</TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full overflow-auto">
           <Table>
@@ -67,36 +56,9 @@ export function TableShowcase() {
         title="Tabela com Ações"
         description="Tabela com botões de ação por linha"
         category="Dados"
-        code={`import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2 } from "lucide-react";
-
-<Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead>ID</TableHead>
-      <TableHead>Nome</TableHead>
-      <TableHead>Cargo</TableHead>
-      <TableHead className="text-right">Ações</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow>
-      <TableCell>001</TableCell>
-      <TableCell>João Silva</TableCell>
-      <TableCell>Desenvolvedor</TableCell>
-      <TableCell className="text-right">
-        <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" className="text-destructive">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
-  </TableBody>
-</Table>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full overflow-auto">
           <Table>
@@ -138,18 +100,9 @@ import { Eye, Edit, Trash2 } from "lucide-react";
         title="Tabela Striped"
         description="Tabela com linhas alternadas para melhor leitura"
         category="Dados"
-        code={`<Table>
-  <TableBody>
-    {data.map((item, index) => (
-      <TableRow 
-        key={item.id}
-        className={index % 2 === 0 ? "bg-muted/50" : ""}
-      >
-        ...
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>`}
+        codeReact={exportData?.codeReact ?? exportData?.code ?? ""}
+        codeVue={exportData?.codeVue ?? exportData?.code ?? ""}
+        codeBootstrap={exportData?.codeBootstrap ?? exportData?.code ?? ""}
       >
         <div className="w-full overflow-auto">
           <Table>
