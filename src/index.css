@@ -88,51 +88,71 @@
   }
 
   .dark {
-    --background: 210 29% 8%;
-    --foreground: 210 20% 98%;
+    /* Fundo mais escuro mas não preto puro - melhor para os olhos */
+    --background: 215 28% 10%;
+    --foreground: 210 20% 95%;
 
-    --card: 210 29% 10%;
-    --card-foreground: 210 20% 98%;
+    /* Cards com contraste sutil em relação ao fundo */
+    --card: 215 25% 14%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 210 29% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 215 25% 14%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 202 59% 48%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary mais vibrante para contraste */
+    --primary: 202 70% 55%;
+    --primary-foreground: 215 28% 10%;
 
-    --secondary: 210 25% 25%;
-    --secondary-foreground: 210 20% 98%;
+    /* Secondary com contraste melhorado */
+    --secondary: 210 20% 22%;
+    --secondary-foreground: 210 20% 92%;
 
-    --muted: 210 25% 20%;
-    --muted-foreground: 210 20% 65%;
+    /* Muted mais claro para melhor legibilidade */
+    --muted: 215 20% 18%;
+    --muted-foreground: 210 15% 70%;
 
-    --accent: 202 59% 48%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent vibrante */
+    --accent: 202 70% 55%;
+    --accent-foreground: 215 28% 10%;
 
-    --destructive: 0 62% 40%;
+    /* Cores semânticas ajustadas para dark mode */
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 35%;
-    --success-foreground: 0 0% 100%;
+    --success: 142 70% 50%;
+    --success-foreground: 142 70% 10%;
 
-    --warning: 45 93% 47%;
-    --warning-foreground: 0 0% 0%;
+    --warning: 45 100% 55%;
+    --warning-foreground: 45 100% 10%;
 
-    --info: 202 59% 48%;
-    --info-foreground: 0 0% 100%;
+    --info: 202 70% 55%;
+    --info-foreground: 215 28% 10%;
 
-    --border: 210 25% 20%;
-    --input: 210 25% 20%;
-    --ring: 202 59% 48%;
+    /* Bordas mais visíveis */
+    --border: 215 20% 25%;
+    --input: 215 20% 22%;
+    --ring: 202 70% 55%;
 
-    --sidebar-background: 210 29% 8%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 202 59% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 15%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 210 25% 20%;
-    --sidebar-ring: 202 59% 48%;
+    /* Gradientes para dark mode */
+    --gradient-corporate: linear-gradient(135deg, hsl(202 70% 45%), hsl(202 70% 60%));
+    --gradient-section: linear-gradient(to right, hsl(202 70% 55% / 0.15), hsl(202 70% 55% / 0.05));
+    --gradient-header: linear-gradient(90deg, hsl(202 70% 45%), hsl(202 70% 60%));
+
+    /* Sombras para dark mode - mais sutis */
+    --shadow-form: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -1px hsl(0 0% 0% / 0.2);
+    --shadow-section: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-card: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -2px hsl(0 0% 0% / 0.2);
+    --shadow-elevated: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 10px 10px -5px hsl(0 0% 0% / 0.2);
+
+    /* Sidebar dark */
+    --sidebar-background: 215 28% 10%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 202 70% 55%;
+    --sidebar-primary-foreground: 215 28% 10%;
+    --sidebar-accent: 215 20% 18%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 20% 25%;
+    --sidebar-ring: 202 70% 55%;
   }
 }
 
@@ -161,21 +181,105 @@
   h4 {
     @apply text-lg font-medium text-primary;
   }
+
+  /* ============================================
+     ACCESSIBILITY IMPROVEMENTS - NORTE A11y
+     ============================================ */
+
+  /* Enhanced Focus Rings - More visible for keyboard navigation */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Skip Link - For keyboard users to skip to main content */
+  .skip-link {
+    @apply absolute left-4 top-4 z-[100] px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium;
+    @apply transform -translate-y-full opacity-0 pointer-events-none;
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .skip-link:focus {
+    @apply translate-y-0 opacity-100 pointer-events-auto;
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* High contrast focus for interactive elements */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 210 20% 40%;
+      --ring: 204 80% 30%;
+    }
+
+    .dark {
+      --border: 215 20% 50%;
+      --ring: 202 70% 70%;
+    }
+  }
 }
 
 @layer components {
-  /* Code block styling */
+  /* Code block styling - improved for dark mode */
   .code-block {
-    @apply bg-muted rounded-md p-4 font-mono text-sm overflow-x-auto;
+    @apply bg-muted/50 dark:bg-muted/30 rounded-md p-4 font-mono text-sm overflow-x-auto border border-border;
   }
 
-  /* Example block - NORTE style */
+  /* Example block - NORTE style with dark mode support */
   .example-block {
-    @apply bg-muted/50 border-l-4 border-accent p-4 rounded-r-md my-4;
+    @apply bg-muted/50 dark:bg-muted/20 border-l-4 border-accent p-4 rounded-r-md my-4;
   }
 
-  /* Meta info block - NORTE style */
+  /* Meta info block - NORTE style with dark mode support */
   .meta-block {
-    @apply bg-muted/50 border-l-4 border-primary p-4 rounded-r-md;
+    @apply bg-muted/50 dark:bg-muted/20 border-l-4 border-primary p-4 rounded-r-md;
+  }
+
+  /* Focus indicator helper class */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Screen reader only - visually hidden but accessible */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  /* Not screen reader only - makes sr-only visible on focus */
+  .not-sr-only {
+    @apply static w-auto h-auto p-0 m-0 overflow-visible whitespace-normal;
+    clip: auto;
+  }
+
+  /* Touch-friendly targets for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Keyboard navigation indicator */
+  .keyboard-nav-active *:focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }

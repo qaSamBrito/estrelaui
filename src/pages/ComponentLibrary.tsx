@@ -244,11 +244,23 @@ export default function ComponentLibrary() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip Link for keyboard navigation */}
+      <a 
+        href="#main-content" 
+        className="skip-link"
+        aria-label="Pular para o conteúdo principal"
+      >
+        Pular para o conteúdo
+      </a>
+
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header 
+        className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        role="banner"
+      >
         <div className="container flex h-16 items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-corporate flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-gradient-corporate flex items-center justify-center" aria-hidden="true">
               <span className="text-white font-bold">N</span>
             </div>
             <div>
@@ -259,36 +271,47 @@ export default function ComponentLibrary() {
           
           <div className="flex-1 max-w-md ml-8">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input 
-                className="pl-10" 
+                className="pl-10 bg-background" 
                 placeholder="Buscar componentes..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Buscar componentes"
+                role="searchbox"
               />
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">{filteredComponents.length} {filteredComponents.length === 1 ? "componente" : "componentes"}</span>
+          <nav className="ml-auto flex items-center gap-2 flex-wrap" aria-label="Ações principais">
+            <span className="text-sm text-muted-foreground whitespace-nowrap" aria-live="polite">
+              {filteredComponents.length} {filteredComponents.length === 1 ? "componente" : "componentes"}
+            </span>
 
             <Button variant="outline" size="sm" asChild>
-              <Link to="/exemplo">
-                <ExternalLink className="h-4 w-4 mr-2" />
+              <Link to="/exemplo" aria-label="Ver exemplo de formulário">
+                <ExternalLink className="h-4 w-4 mr-2" aria-hidden="true" />
                 Ver exemplo
               </Link>
             </Button>
 
-            <Button variant="outline" size="sm" onClick={handleDownloadMarkdown}>
-              <FileText className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleDownloadMarkdown} aria-label="Baixar documentação em Markdown">
+              <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
               .MD
             </Button>
 
-            <Button variant="default" size="sm" onClick={handleDownloadZip} disabled={isExporting}>
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleDownloadZip} 
+              disabled={isExporting}
+              aria-label="Baixar componentes em ZIP"
+              aria-busy={isExporting}
+            >
               {isExporting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
               ) : (
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 mr-2" aria-hidden="true" />
               )}
               ZIP
             </Button>
@@ -298,11 +321,11 @@ export default function ComponentLibrary() {
             <Button variant="outline" size="sm" asChild>
               <Link to="/gerador">Backoffice</Link>
             </Button>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <div className="container py-8">
+      <main id="main-content" className="container py-8" role="main" tabIndex={-1}>
         {/* Info Banner */}
         <div className="meta-block mb-8">
           <div className="flex items-start gap-4">
@@ -317,73 +340,88 @@ export default function ComponentLibrary() {
         </div>
 
         {/* Category Tabs - quebra de linha para não ocultar itens */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 pb-2">
+        <nav className="mb-8" aria-label="Categorias de componentes">
+          <div className="flex flex-wrap gap-2 pb-2" role="tablist" aria-label="Filtrar por categoria">
             {categories.map((cat) => (
               <Button
                 key={cat.id}
                 variant={activeCategory === cat.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setActiveCategory(cat.id)}
+                role="tab"
+                aria-selected={activeCategory === cat.id}
+                aria-controls="components-list"
               >
-                <cat.icon className="h-4 w-4 mr-2" />
+                <cat.icon className="h-4 w-4 mr-2" aria-hidden="true" />
                 {cat.label}
               </Button>
             ))}
           </div>
-        </div>
+        </nav>
 
         {/* Components */}
-        {filteredComponents.length > 0 ? (
-          <div className="space-y-8">
-            {filteredComponents.map((comp) => {
-              const Component = comp.component;
-              const isExpanded = expandedComponent === comp.id || expandedComponent === null;
-              const exportData = comp.exportId ? componentDataById[comp.exportId] : null;
+        <div id="components-list" role="tabpanel" aria-label="Lista de componentes">
+          {filteredComponents.length > 0 ? (
+            <div className="space-y-8">
+              {filteredComponents.map((comp) => {
+                const Component = comp.component;
+                const isExpanded = expandedComponent === comp.id || expandedComponent === null;
+                const exportData = comp.exportId ? componentDataById[comp.exportId] : null;
 
-              return (
-                <section key={comp.id} className="scroll-mt-20" id={comp.id}>
-                  <div className="mb-4">
-                    <button
-                      onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
-                      className="flex items-center gap-2 group cursor-pointer w-full min-w-0 text-left"
-                    >
-                      <h2 className="text-2xl font-semibold text-secondary truncate">{comp.name}</h2>
-                      <ChevronDown className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform ${!isExpanded ? "-rotate-90" : ""}`} />
-                    </button>
-                    {(comp.subtitle || exportData) && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-muted-foreground">
-                          {comp.subtitle ?? exportData?.category ?? ""}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {isExpanded && (
-                    <div className="space-y-4">
-                      <Component />
+                return (
+                  <section 
+                    key={comp.id} 
+                    className="scroll-mt-20" 
+                    id={comp.id}
+                    aria-labelledby={`heading-${comp.id}`}
+                  >
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
+                        className="flex items-center gap-2 group cursor-pointer w-full min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md px-2 py-1 -ml-2"
+                        aria-expanded={isExpanded}
+                        aria-controls={`content-${comp.id}`}
+                        id={`heading-${comp.id}`}
+                      >
+                        <h2 className="text-2xl font-semibold text-secondary truncate">{comp.name}</h2>
+                        <ChevronDown className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform ${!isExpanded ? "-rotate-90" : ""}`} aria-hidden="true" />
+                      </button>
+                      {(comp.subtitle || exportData) && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-muted-foreground">
+                            {comp.subtitle ?? exportData?.category ?? ""}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <Search className="h-16 w-16 mx-auto text-muted-foreground/20 mb-4" />
-            <h3 className="text-xl font-medium text-muted-foreground">Nenhum componente encontrado</h3>
-            <p className="text-sm text-muted-foreground mt-2">
-              Tente buscar por outro termo ou selecione outra categoria.
-            </p>
-          </div>
-        )}
-      </div>
+                    <div id={`content-${comp.id}`} aria-hidden={!isExpanded}>
+                      {isExpanded && (
+                        <div className="space-y-4">
+                          <Component />
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16" role="status" aria-live="polite">
+              <Search className="h-16 w-16 mx-auto text-muted-foreground/20 mb-4" aria-hidden="true" />
+              <h3 className="text-xl font-medium text-muted-foreground">Nenhum componente encontrado</h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Tente buscar por outro termo ou selecione outra categoria.
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t mt-16 py-8 bg-muted/30">
+      <footer className="border-t border-border mt-16 py-8 bg-muted/30 dark:bg-muted/10" role="contentinfo">
         <div className="container text-center">
           <p className="text-sm text-muted-foreground">
-            <strong>NORTE – Sistema de Padrões Estrela</strong><br />
+            <strong className="text-foreground">NORTE – Sistema de Padrões Estrela</strong><br />
             Versão 2.0 | {components.length} Componentes | Gerência de Desenvolvimento
           </p>
         </div>

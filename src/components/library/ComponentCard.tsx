@@ -100,12 +100,12 @@ export function ComponentCard({
   ) : null;
 
   return (
-    <div className="bg-card rounded-lg border shadow-card overflow-hidden">
-      <div className="p-4 border-b bg-gradient-section">
+    <div className="bg-card rounded-lg border border-border shadow-card overflow-hidden">
+      <div className="p-4 border-b border-border bg-muted/30 dark:bg-muted/20">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             {category && (
-              <span className="inline-block px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded mb-2">
+              <span className="inline-block px-2 py-0.5 text-xs font-medium bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary rounded mb-2">
                 {category}
               </span>
             )}
