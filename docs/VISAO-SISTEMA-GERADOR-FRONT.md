@@ -300,7 +300,7 @@ Ou seja: **padrão de interface + catálogo de componentes + export** já estão
 - **Biblioteca: barra de código por componente** – Para cada componente, dentro da visualização do código, uma barra única substitui os antigos botões (<> e Copiar). Ordem: **Combo (stack)** em primeiro (com opção “Selecione” como padrão), **?** (Como usar), ícone **<>**, **Copiar**. O combo define o conteúdo exibido no bloco de código e no exemplo do popover “?”. Com “Selecione”, exibe mensagem orientando a escolher uma stack; ao selecionar React, Vue ou Bootstrap, o código e o exemplo atualizam conforme a stack.
 - **Código por stack no export** – O `componentExport` expõe código por stack: `codeReact`, `codeVue`, `codeBootstrap` (opcionais), com fallback para `code`. Na biblioteca, o combo define o código e o exemplo exibidos.
 - **codeVue e codeBootstrap completos** – Todos os componentes do catálogo passaram a ter exemplos em Vue e Bootstrap (slider, alert, badge, avatar, dialog, tabs, progress, tooltip, dropdown, table, calendar, toast, breadcrumb, pagination, typography, splitbutton, rangeslider, rating, fileupload, chips, header, sidebar, treeview, stepper, timeline, notification, copytoclipboard, loaders, icons), além dos já existentes (button, input, select, checkbox, switch, textarea, card, colors, colorpicker).
-- **Integração IA expandida (OpenAI GPT)** – Provedor URL customizada ou OpenAI; chave via `.env` ou campo (não persistida).
+- **Integração IA expandida (OpenAI GPT)** – Provedor URL customizada ou OpenAI; chave via `.env` ou campo (não persistida). Validação de chave no painel (botão "Validar chave"; confere conexão e billing). Em produção: `VITE_IA_LOG_URL` opcional para enviar logs de request/response da IA a um serviço de monitoramento.
 - **Fase 13** – Modelo OpenAI configurável; data-testid e a11y em todo código gerado.
 - **Fase 14** – Testes E2E (Playwright) e documento Como adicionar nova stack/tema.
 - **Fase 15** – Tema visual opcional (NORTE e Minimal) no Gerador; select na UI; CSS por tema em HTML e Vue.
@@ -321,6 +321,22 @@ Ou seja: **padrão de interface + catálogo de componentes + export** já estão
 - **A11y da UI do Gerador:** Revisar labels e roles dos controles do passo 1 para leitores de tela e navegação por teclado. ✅ Concluído (labels, aria-label, aria-describedby, role="region"/"alert"/"status", id nos triggers).
 
 **Simplificação da tela de gerar (aplicada):** Passo 1 reorganizado com foco em "O que você quer gerar?" → campo de descrição + botão "Gerar tela". Stack, Tema, Modo protótipo e Usar IA foram movidos para "Opções avançadas" (Collapsible fechado por padrão), reduzindo ruído visual e tornando o fluxo mais intuitivo.
+
+---
+
+## 19. Fluxo IA, validação e entrega (visão detalhada)
+
+O documento **[FLUXO-IA-VALIDACAO-E-ENTREGA.md](./FLUXO-IA-VALIDACAO-E-ENTREGA.md)** descreve em detalhe:
+
+- Processamento inicial (sanitização, ambiguidade, termos sensíveis)
+- Interpretação pela IA (intenção, telas, campos, regras, assumptions)
+- O que o usuário vê (preview, estrutura, regras inferidas, assumptions)
+- Validação pelo usuário (editar, confirmar/rejeitar assumptions – *IA não é soberana*)
+- Geração versionada (v1, v2, v3) e opções de saída (ZIP, repo, Jira, template)
+- Fluxo de iteração, enterprise, QA/UAT
+- Personas (PO, Dev, QA, Gestor) e diferencial do produto
+
+Inclui também um **mapeamento** do que já existe no sistema atual versus essa visão, para guiar a evolução do produto.
 
 ---
 

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -23,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Check, X, ExternalLink, Lightbulb, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ExternalLink, Lightbulb, Search, Sparkles, Loader2 } from "lucide-react";
 import { logAudit } from "@/lib/audit";
 import { componentsData } from "@/lib/componentExport";
 import { exportIdToSectionId, exportIdToCategoryId } from "@/pages/ComponentLibrary";
@@ -71,6 +72,50 @@ const categories = [
 
 const PAGE_SIZE = 6;
 
+const OPENAI_SYSTEM_PROMPT_COMPONENT =
+  "Você é um assistente de documentação de design system. Com base no nome do componente, categoria, caso de uso e na descrição inicial fornecida pelo usuário, gere uma única descrição técnica e clara para o componente. A descrição deve: ser em português; descrever o propósito visual e funcional; mencionar validações, estados (erro, desabilitado) e integração com formulários quando fizer sentido; seguir padrão de documentação de design system (EstrelaUI/NORTE). Retorne apenas o texto da descrição, sem título, sem explicação adicional.";
+
+async function improveDescriptionWithIA(
+  name: string,
+  category: string,
+  useCase: string,
+  description: string
+): Promise<string> {
+  const key = (import.meta as unknown as { env?: { VITE_OPENAI_API_KEY?: string } }).env?.VITE_OPENAI_API_KEY?.trim();
+  if (!key) throw new Error("Configure VITE_OPENAI_API_KEY no .env para usar Melhorar com IA.");
+  const userContent = `Nome do componente: ${name || "(não informado)"}\nCategoria: ${category || "(não informada)"}\nCaso de uso: ${useCase || "(não informado)"}\n\nDescrição inicial do usuário:\n${description}`;
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: OPENAI_SYSTEM_PROMPT_COMPONENT },
+        { role: "user", content: userContent },
+      ],
+      max_tokens: 512,
+    }),
+  });
+  if (!res.ok) {
+    let message = "Erro ao chamar a IA.";
+    try {
+      const err = await res.json() as { error?: { message?: string } };
+      message = err?.error?.message ?? message;
+    } catch {
+      const text = await res.text();
+      if (text) message = `Erro ${res.status}: ${text.slice(0, 200)}`;
+      else message = `Erro ${res.status}: ${res.statusText}`;
+    }
+    throw new Error(message);
+  }
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const text = data.choices?.[0]?.message?.content?.trim();
+  return text ?? description;
+}
+
 export default function Componentes() {
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -89,6 +134,12 @@ export default function Componentes() {
   const [validatingId, setValidatingId] = useState<string | null>(null);
   const [validacaoAcao, setValidacaoAcao] = useState<"aprovar" | "recusar">("aprovar");
   const [rejectedReason, setRejectedReason] = useState("");
+  type ImproveIAModal = "closed" | "empty" | "preview";
+  const [improveIAModal, setImproveIAModal] = useState<ImproveIAModal>("closed");
+  const [suggestedDescription, setSuggestedDescription] = useState("");
+  const [editableSuggestedDescription, setEditableSuggestedDescription] = useState("");
+  const [isImprovingIA, setIsImprovingIA] = useState(false);
+  const [improveIAError, setImproveIAError] = useState<string | null>(null);
 
   const repoComponents = useMemo<ComponentListItem[]>(() => {
     const baseDate = new Date("2026-02-01T12:00:00").getTime();
@@ -268,6 +319,36 @@ export default function Componentes() {
     setValidatingId(null);
   };
 
+  const handleMelhorarComIA = async () => {
+    if (!description.trim()) {
+      setImproveIAModal("empty");
+      return;
+    }
+    setIsImprovingIA(true);
+    setImproveIAError(null);
+    try {
+      const improved = await improveDescriptionWithIA(name, category, useCase, description);
+      setSuggestedDescription(improved);
+      setEditableSuggestedDescription(improved);
+      setImproveIAModal("preview");
+    } catch (e) {
+      setImproveIAError(e instanceof Error ? e.message : "Erro ao aprimorar com IA.");
+      setImproveIAModal("preview");
+      setSuggestedDescription(description);
+      setEditableSuggestedDescription(description);
+    } finally {
+      setIsImprovingIA(false);
+    }
+  };
+
+  const applySuggestedDescription = () => {
+    setDescription(editableSuggestedDescription);
+    setImproveIAModal("closed");
+    setSuggestedDescription("");
+    setEditableSuggestedDescription("");
+    setImproveIAError(null);
+  };
+
   const statusBadge = (status: ComponentSuggestionStatus) => {
     const variants: Record<ComponentSuggestionStatus, "default" | "secondary" | "destructive" | "outline"> = {
       pendente: "secondary",
@@ -290,7 +371,7 @@ export default function Componentes() {
               Descreva o componente. Após inserir ou alterar, a sugestão irá para validação por QA ou PO.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setViewMode("list")}>
+          <Button variant="outline" size="default" onClick={() => setViewMode("list")}>
             Voltar para listagem
           </Button>
         </div>
@@ -336,7 +417,25 @@ export default function Componentes() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descrição do componente</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="description">Descrição do componente</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMelhorarComIA}
+                      disabled={isImprovingIA}
+                      className="shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      aria-label="Melhorar descrição com IA"
+                    >
+                      {isImprovingIA ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden />
+                      ) : (
+                        <Sparkles className="h-4 w-4 mr-2" aria-hidden />
+                      )}
+                      Melhorar com IA
+                    </Button>
+                  </div>
                   <Textarea
                     id="description"
                     value={description}
@@ -365,12 +464,12 @@ export default function Componentes() {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={() => setViewMode("list")}
                     >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={!name.trim()}>
+                    <Button type="submit" variant="default" size="default" disabled={!name.trim()}>
                       <Plus className="h-4 w-4 mr-2" />
                       {editingId ? "Salvar alterações" : "Enviar sugestão"}
                     </Button>
@@ -380,6 +479,61 @@ export default function Componentes() {
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={improveIAModal === "empty"} onOpenChange={(open) => !open && setImproveIAModal("closed")}>
+          <DialogContent className="sm:max-w-md" aria-describedby="improve-ia-empty-desc">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                Melhorar com IA
+              </DialogTitle>
+              <DialogDescription id="improve-ia-empty-desc">
+                Escreva pelo menos uma descrição inicial para que a IA possa aprimorar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end pt-2">
+              <Button variant="outline" size="default" onClick={() => setImproveIAModal("closed")}>
+                Fechar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={improveIAModal === "preview"} onOpenChange={(open) => !open && (setImproveIAModal("closed"), setImproveIAError(null))}>
+          <DialogContent className="sm:max-w-lg" aria-describedby="improve-ia-preview-desc">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                Sugestão da IA
+              </DialogTitle>
+              <DialogDescription id="improve-ia-preview-desc">
+                Revise o texto abaixo. Você pode editar antes de aplicar. A descrição continua sujeita à validação de QA/PO.
+              </DialogDescription>
+            </DialogHeader>
+            {improveIAError && (
+              <p className="text-sm text-destructive" role="alert">
+                {improveIAError}
+              </p>
+            )}
+            <Textarea
+              value={editableSuggestedDescription}
+              onChange={(e) => setEditableSuggestedDescription(e.target.value)}
+              placeholder="Descrição sugerida pela IA"
+              rows={6}
+              className="font-sans resize-y"
+              aria-label="Descrição sugerida pela IA (editável)"
+            />
+            <div className="flex flex-wrap justify-end gap-2 pt-2">
+              <Button variant="outline" size="default" onClick={() => setImproveIAModal("closed")}>
+                Cancelar
+              </Button>
+              <Button variant="default" size="default" onClick={applySuggestedDescription}>
+                <Check className="h-4 w-4 mr-2" aria-hidden />
+                Aceitar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
@@ -393,7 +547,7 @@ export default function Componentes() {
             Pesquise componentes já publicados no repositório EstrelaUI ou sugestões em análise. Cadastre novos itens para validação.
           </p>
         </div>
-        <Button onClick={handleCadastrarNovo}>
+        <Button variant="default" size="default" onClick={handleCadastrarNovo}>
           <Plus className="h-4 w-4 mr-2" />
           Novo componente
         </Button>
@@ -468,7 +622,7 @@ export default function Componentes() {
                 {searchQuery ? "Nenhum componente encontrado." : "Nenhuma sugestão de componente ainda."}
               </p>
               {!searchQuery && (
-                <Button onClick={handleCadastrarNovo}>
+                <Button variant="default" size="default" onClick={handleCadastrarNovo}>
                   <Plus className="h-4 w-4 mr-2" />
                   Novo componente
                 </Button>
@@ -507,28 +661,28 @@ export default function Componentes() {
                   <CardContent className="mt-auto flex flex-wrap gap-2 pt-2">
                     {item.source === "sugestao" ? (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => handleEditar(item)}>
+                        <Button variant="outline" size="sm" onClick={() => handleEditar(item)} className="shrink-0">
                           <Pencil className="h-4 w-4 mr-1" />
                           Editar
                         </Button>
                         {item.status === "pendente" && (
                           <>
-                            <Button variant="outline" size="sm" onClick={() => handleValidar(item.id, "aprovar")}>
+                            <Button variant="outline" size="sm" onClick={() => handleValidar(item.id, "aprovar")} className="shrink-0">
                               <Check className="h-4 w-4 mr-1" />
                               Aprovar
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleValidar(item.id, "recusar")}>
+                            <Button variant="outline" size="sm" onClick={() => handleValidar(item.id, "recusar")} className="shrink-0">
                               <X className="h-4 w-4 mr-1" />
                               Recusar
                             </Button>
                           </>
                         )}
-                        <Button variant="ghost" size="sm" onClick={() => handleExcluir(item.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <Button variant="ghost" size="sm" onClick={() => handleExcluir(item.id)} className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-muted/50">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </>
                     ) : (
-                      <Button asChild variant="outline" size="sm">
+                      <Button asChild variant="outline" size="sm" className="shrink-0">
                         <Link
                           to={
                             (() => {
@@ -555,7 +709,7 @@ export default function Componentes() {
               <div className="flex items-center justify-center gap-2 pt-4">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                 >
@@ -566,7 +720,7 @@ export default function Componentes() {
                 </span>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
                 >
@@ -577,6 +731,61 @@ export default function Componentes() {
           </>
         )}
       </div>
+
+      <Dialog open={improveIAModal === "empty"} onOpenChange={(open) => !open && setImproveIAModal("closed")}>
+        <DialogContent className="sm:max-w-md" aria-describedby="improve-ia-empty-desc">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+              Melhorar com IA
+            </DialogTitle>
+            <DialogDescription id="improve-ia-empty-desc">
+              Escreva pelo menos uma descrição inicial para que a IA possa aprimorar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-2">
+            <Button variant="outline" size="default" onClick={() => setImproveIAModal("closed")}>
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={improveIAModal === "preview"} onOpenChange={(open) => !open && (setImproveIAModal("closed"), setImproveIAError(null))}>
+        <DialogContent className="sm:max-w-lg" aria-describedby="improve-ia-preview-desc">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+              Sugestão da IA
+            </DialogTitle>
+            <DialogDescription id="improve-ia-preview-desc">
+              Revise o texto abaixo. Você pode editar antes de aplicar. A descrição continua sujeita à validação de QA/PO.
+            </DialogDescription>
+          </DialogHeader>
+          {improveIAError && (
+            <p className="text-sm text-destructive" role="alert">
+              {improveIAError}
+            </p>
+          )}
+          <Textarea
+            value={editableSuggestedDescription}
+            onChange={(e) => setEditableSuggestedDescription(e.target.value)}
+            placeholder="Descrição sugerida pela IA"
+            rows={6}
+            className="font-sans resize-y"
+            aria-label="Descrição sugerida pela IA (editável)"
+          />
+          <div className="flex flex-wrap justify-end gap-2 pt-2">
+            <Button variant="outline" size="default" onClick={() => setImproveIAModal("closed")}>
+              Cancelar
+            </Button>
+            <Button variant="default" size="default" onClick={applySuggestedDescription}>
+              <Check className="h-4 w-4 mr-2" aria-hidden />
+              Aceitar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={showExcluirDialog} onOpenChange={setShowExcluirDialog}>
         <AlertDialogContent>

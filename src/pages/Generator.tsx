@@ -43,6 +43,8 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { cn } from "@/lib/utils";
 import { logAudit } from "@/lib/audit";
+import { logIARequest, logIAResponse } from "@/lib/iaLog";
+import { validateOpenAIKey } from "@/lib/openaiValidate";
 import { buildSpecFromPrompt, type Field, type ScreenSpec, type ThemeId } from "@/lib/generatorSpec";
 import { PREVIEW_SPEC_KEY } from "@/pages/GeradorPreview";
 import { Eye, Pencil, Trash2, Plus, FileText, Package, Upload, ChevronUp, ChevronDown, CheckCircle, SlidersHorizontal, Settings2, ExternalLink, Code2, Copy, Download, Sparkles, Check, X, Save, Search } from "lucide-react";
@@ -64,6 +66,13 @@ type EditContext =
   | { type: "field"; fieldId: string }
   | { type: "entity" }
   | { type: "listColumn"; index: number };
+
+/** Resultado da interpretação por IA: status explícito para feedback ao usuário (🟢/🟡/🔴). */
+type IAInterpretResult =
+  | { status: "success"; text: string }
+  | { status: "empty"; text: string; message: string }
+  | { status: "unavailable"; text: string; message: string }
+  | { status: "no_key"; text: string; message: string };
 
 const STORAGE_KEY = "estrelaui-generator-specs";
 
@@ -243,24 +252,16 @@ function renderPreviewField(field: Field): React.ReactNode {
   );
 }
 
-const buildCodeSnippet = (spec: ScreenSpec) => {
-  if (spec.type === "login") {
-    return `import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-<Card className="max-w-md">
-  <CardHeader>
-    <CardTitle>Acesso ao Sistema</CardTitle>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    <Input type="email" placeholder="seu@email.com" />
-    <Input type="password" placeholder="Digite sua senha" />
-    <Button className="w-full">Entrar</Button>
-  </CardContent>
-</Card>`;
+const buildCodeSnippet = (spec: ScreenSpec): string => {
+  const stack = (spec.stack || "react").toLowerCase();
+  if (stack === "vue") return buildVueAppFile(spec);
+  if (stack === "bootstrap") return buildBootstrapHtmlFile(spec);
+  if (stack === "angular") {
+    const ts = buildAngularComponentTs(spec);
+    const html = buildAngularComponentHtml(spec);
+    return `// app.component.ts\n${ts}\n\n// --- app.component.html ---\n\n${html}`;
   }
-
+  // React (padrão)
   return buildAppFile(spec);
 };
 
@@ -2272,11 +2273,18 @@ export default function Generator() {
   const [isExportingHtml, setIsExportingHtml] = useState(false);
   const [modoPrototipo, setModoPrototipo] = useState(false);
   const [useIA, setUseIA] = useState(false);
-  const [iaProvider, setIaProvider] = useState<"url" | "openai">("url");
+  const [iaProvider, setIaProvider] = useState<"url" | "openai">("openai");
   const [apiUrlIA, setApiUrlIA] = useState("");
   const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [openaiModel, setOpenaiModel] = useState("gpt-4o-mini");
+  const [openaiKeyValidating, setOpenaiKeyValidating] = useState(false);
+  const [openaiKeyValidationMessage, setOpenaiKeyValidationMessage] = useState<{ ok: boolean; message: string } | null>(null);
   const [isInterpretingIA, setIsInterpretingIA] = useState(false);
+  const [interpretedByIA, setInterpretedByIA] = useState<string | null>(null);
+  const [attemptedIAInterpretation, setAttemptedIAInterpretation] = useState(false);
+  /** Status real da IA para feedback explícito: success | empty | unavailable | no_key. */
+  const [iaStatus, setIaStatus] = useState<"idle" | "success" | "empty" | "unavailable" | "no_key">("idle");
+  const [iaStatusMessage, setIaStatusMessage] = useState<string | null>(null);
   const [tagsInput, setTagsInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
@@ -2342,6 +2350,10 @@ export default function Generator() {
       setHasGenerated(true);
       setConcluido(savedFromNav.status === "final");
       setActivePreviewCodeTab("preview");
+      setInterpretedByIA(null);
+      setAttemptedIAInterpretation(false);
+      setIaStatus("idle");
+      setIaStatusMessage(null);
     }
   }, [savedFromNav]);
 
@@ -2524,51 +2536,147 @@ export default function Generator() {
   };
 
   const interpretWithIA = useCallback(
-    async (promptText: string, options?: { source?: string; fileName?: string }): Promise<string> => {
+    async (promptText: string, options?: { source?: string; fileName?: string }): Promise<IAInterpretResult> => {
+      const logRequest = () =>
+        logIARequest({ provider: iaProvider, promptLength: promptText.length, promptPreview: promptText.slice(0, 150) });
+      const logResponse = (result: IAInterpretResult) =>
+        logIAResponse({ status: result.status, textLength: result.text?.length, ...("message" in result ? { message: result.message } : {}) });
+
       if (iaProvider === "url" && apiUrlIA.trim()) {
-        const res = await fetch(apiUrlIA.trim(), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: promptText,
-            ...(options?.source && { source: options.source }),
-            ...(options?.fileName && { fileName: options.fileName }),
-          }),
-        });
-        if (!res.ok) return promptText;
-        const data = (await res.json()) as { interpretedPrompt?: string; prompt?: string };
-        const interpreted = data.interpretedPrompt ?? data.prompt;
-        return typeof interpreted === "string" && interpreted.trim() ? interpreted.trim() : promptText;
+        logRequest();
+        try {
+          const res = await fetch(apiUrlIA.trim(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: promptText,
+              ...(options?.source && { source: options.source }),
+              ...(options?.fileName && { fileName: options.fileName }),
+            }),
+          });
+          if (!res.ok) {
+            const body = await res.text();
+            const msg = `API retornou ${res.status}. ${body.slice(0, 200)}`;
+            const out: IAInterpretResult = { status: "unavailable", text: promptText, message: msg };
+            logResponse(out);
+            return out;
+          }
+          const data = (await res.json()) as { interpretedPrompt?: string; prompt?: string };
+          const interpreted = (data.interpretedPrompt ?? data.prompt)?.trim();
+          const hasContent = typeof interpreted === "string" && interpreted.length > 0;
+          const isDifferent = hasContent && interpreted !== promptText.trim();
+          if (!hasContent) {
+            const out: IAInterpretResult = { status: "empty", text: promptText, message: "Resposta vazia da API de interpretação." };
+            logResponse(out);
+            return out;
+          }
+          if (!isDifferent) {
+            const out: IAInterpretResult = { status: "empty", text: promptText, message: "A IA retornou texto igual ao prompt (sem interpretação semântica)." };
+            logResponse(out);
+            return out;
+          }
+          const out: IAInterpretResult = { status: "success", text: interpreted };
+          logResponse(out);
+          return out;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Erro de rede ou timeout.";
+          const out: IAInterpretResult = { status: "unavailable", text: promptText, message: msg };
+          logResponse(out);
+          return out;
+        }
       }
+
       if (iaProvider === "openai") {
         const key = openaiApiKey.trim() || (import.meta as unknown as { env?: { VITE_OPENAI_API_KEY?: string } }).env?.VITE_OPENAI_API_KEY;
-        if (!key) return promptText;
+        if (!key) {
+          const out: IAInterpretResult = { status: "no_key", text: promptText, message: "Chave da API OpenAI não configurada. Configure em Opções avançadas ou em VITE_OPENAI_API_KEY." };
+          logRequest();
+          logResponse(out);
+          return out;
+        }
         const systemContent =
-          "Você é um assistente de especificação de front-end. Dado o texto do usuário, retorne apenas uma descrição refinada e clara, no mesmo idioma, adequada para gerar uma tela (formulário, CRUD, login, etc.). Sem código, sem explicação: apenas a descrição refinada em um único bloco de texto.";
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${key}`,
-          },
-          body: JSON.stringify({
-            model: openaiModel,
-            messages: [
-              { role: "system", content: systemContent },
-              { role: "user", content: promptText },
-            ],
-            max_tokens: 1024,
-          }),
-        });
-        if (!res.ok) return promptText;
-        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-        const content = data.choices?.[0]?.message?.content?.trim();
-        return content ?? promptText;
+          "Interpretar o texto do usuário e gerar a descrição de um componente de interface.\n\nContexto: Ferramenta low-code para projetos internos.\n\nRegras:\n- Expandir semanticamente o texto informado\n- Inferir entidade, campos e ações (ex.: CRUD de alunos → Nome, Email, Idade; Criar, Editar, Excluir; Tabela + Formulário)\n- Não usar templates genéricos (evitar sempre 'Descrição, Status' sem relação com a entidade)\n- Retornar APENAS a descrição clara da interface, no mesmo idioma do usuário, sem código e sem explicação\n- NUNCA repetir o texto do usuário literalmente; produzir versão mais estruturada e técnica";
+        logRequest();
+        try {
+          const res = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+              model: openaiModel,
+              messages: [
+                { role: "system", content: systemContent },
+                { role: "user", content: promptText },
+              ],
+              max_tokens: 1024,
+            }),
+          });
+          const rawBody = await res.text();
+          if (!res.ok) {
+            let msg = `OpenAI retornou ${res.status}`;
+            try {
+              const errJson = JSON.parse(rawBody) as { error?: { message?: string; code?: string } };
+              if (errJson?.error?.message) msg += `: ${errJson.error.message}`;
+              else if (errJson?.error?.code) msg += ` (${errJson.error.code})`;
+            } catch {
+              if (rawBody.length) msg += `. ${rawBody.slice(0, 150)}`;
+            }
+            const out: IAInterpretResult = { status: "unavailable", text: promptText, message: msg };
+            logResponse(out);
+            return out;
+          }
+          const data = JSON.parse(rawBody) as { choices?: Array<{ message?: { content?: string } }> };
+          const content = data.choices?.[0]?.message?.content?.trim() ?? "";
+          const isDifferent = content.length > 0 && content !== promptText.trim();
+          if (content.length === 0) {
+            const out: IAInterpretResult = { status: "empty", text: promptText, message: "A IA não retornou texto (resposta vazia)." };
+            logResponse(out);
+            return out;
+          }
+          if (!isDifferent) {
+            const out: IAInterpretResult = { status: "empty", text: promptText, message: "A IA retornou texto igual ao prompt (sem interpretação semântica)." };
+            logResponse(out);
+            return out;
+          }
+          const out: IAInterpretResult = { status: "success", text: content };
+          logResponse(out);
+          return out;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Erro de rede ou timeout ao chamar a OpenAI.";
+          const out: IAInterpretResult = { status: "unavailable", text: promptText, message: msg };
+          logResponse(out);
+          return out;
+        }
       }
-      return promptText;
+
+      const out: IAInterpretResult = { status: "no_key", text: promptText, message: "Nenhum provedor de IA configurado (URL ou OpenAI)." };
+      logRequest();
+      logResponse(out);
+      return out;
     },
     [iaProvider, apiUrlIA, openaiApiKey, openaiModel]
   );
+
+  const handleValidateOpenAIKey = async () => {
+    const key =
+      openaiApiKey.trim() ||
+      (import.meta as unknown as { env?: { VITE_OPENAI_API_KEY?: string } }).env?.VITE_OPENAI_API_KEY ||
+      "";
+    setOpenaiKeyValidationMessage(null);
+    if (!key.trim()) {
+      setOpenaiKeyValidationMessage({ ok: false, message: "Informe a chave no campo acima ou configure VITE_OPENAI_API_KEY no .env." });
+      return;
+    }
+    setOpenaiKeyValidating(true);
+    try {
+      const result = await validateOpenAIKey(key);
+      setOpenaiKeyValidationMessage({ ok: result.ok, message: result.message });
+    } finally {
+      setOpenaiKeyValidating(false);
+    }
+  };
 
   const handleBatchFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -2590,10 +2698,10 @@ export default function Generator() {
       if (useIA && (apiUrlIA.trim() || iaProvider === "openai")) {
         setIsInterpretingIA(true);
         try {
-          const interpreted = await interpretWithIA(truncated, { source: "file", fileName: file.name });
-          if (interpreted !== truncated) {
-            setPrompt(interpreted);
-            setSuggestedPromptFromFile(interpreted);
+          const result = await interpretWithIA(truncated, { source: "file", fileName: file.name });
+          if (result.status === "success" && result.text !== truncated) {
+            setPrompt(result.text);
+            setSuggestedPromptFromFile(result.text);
           }
         } finally {
           setIsInterpretingIA(false);
@@ -2619,18 +2727,33 @@ export default function Generator() {
     setEditContext(null);
     let promptToUse = prompt.trim();
     if (useIA && (apiUrlIA.trim() || iaProvider === "openai")) {
+      setAttemptedIAInterpretation(true);
       setIsInterpretingIA(true);
       try {
-        const interpreted = await interpretWithIA(promptToUse);
-        if (interpreted.trim()) {
-          promptToUse = interpreted;
+        const result = await interpretWithIA(promptToUse);
+        setIaStatus(result.status);
+        setIaStatusMessage("message" in result ? result.message ?? null : null);
+        if (result.status === "success") {
+          promptToUse = result.text;
           setPrompt(promptToUse);
+          setInterpretedByIA(result.text);
+        } else {
+          setInterpretedByIA(null);
+          // Fallback explícito: não usar texto genérico; manter prompt original e avisar o usuário
+          // (mensagem já definida em iaStatusMessage; UI exibe "IA indisponível. Gerando estrutura padrão...")
         }
-      } catch {
-        // fallback: usa o prompt original
+      } catch (err) {
+        setIaStatus("unavailable");
+        setIaStatusMessage(err instanceof Error ? err.message : "Erro ao chamar a IA.");
+        setInterpretedByIA(null);
       } finally {
         setIsInterpretingIA(false);
       }
+    } else {
+      setAttemptedIAInterpretation(false);
+      setInterpretedByIA(null);
+      setIaStatus("idle");
+      setIaStatusMessage(null);
     }
     const newSpec = buildSpecFromPrompt(promptToUse, stack);
     setSpec((prev) => ({ ...newSpec, theme: prev.theme ?? "norte" }));
@@ -3266,7 +3389,7 @@ export default function Generator() {
                   <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
                     <div className="space-y-0.5 min-w-0">
                       <Label htmlFor="usar-ia">Usar IA para interpretar o prompt</Label>
-                      <p className="text-xs text-muted-foreground">Refina a descrição via API (opcional).</p>
+                      <p className="text-xs text-muted-foreground">IA integrada interpreta o pedido do usuário e refina a descrição para ajudar na criação da tela (opcional).</p>
                     </div>
                     <Switch id="usar-ia" checked={useIA} onCheckedChange={setUseIA} aria-label="Ativar uso de IA para interpretar o prompt" />
                   </div>
@@ -3278,12 +3401,12 @@ export default function Generator() {
                         <div className="space-y-1">
                           <Label htmlFor="ia-provider" className="text-xs">Provedor</Label>
                           <Select value={iaProvider} onValueChange={(v) => setIaProvider(v as "url" | "openai")}>
-                            <SelectTrigger id="ia-provider" aria-label="Provedor de IA: URL customizada ou OpenAI">
+                            <SelectTrigger id="ia-provider" aria-label="Provedor de IA: OpenAI integrada ou URL customizada">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="openai">IA integrada (OpenAI GPT)</SelectItem>
                               <SelectItem value="url">URL customizada (sua API)</SelectItem>
-                              <SelectItem value="openai">OpenAI (GPT)</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -3304,6 +3427,9 @@ export default function Generator() {
                         )}
                         {iaProvider === "openai" && (
                           <>
+                            <p className="text-xs text-muted-foreground">
+                              A IA interpreta o que você descreveu e gera uma especificação mais clara para a tela. Informe sua chave da API OpenAI ou use <code className="rounded bg-muted px-1">VITE_OPENAI_API_KEY</code> no <code className="rounded bg-muted px-1">.env</code>.
+                            </p>
                             <div className="space-y-1">
                               <Label htmlFor="openai-model" className="text-xs">Modelo</Label>
                               <Select value={openaiModel} onValueChange={setOpenaiModel}>
@@ -3321,14 +3447,47 @@ export default function Generator() {
                             </div>
                             <div className="space-y-1">
                               <Label htmlFor="openai-api-key" className="text-xs">Chave API (opcional)</Label>
-                              <Input
-                                id="openai-api-key"
-                                type="password"
-                                value={openaiApiKey}
-                                onChange={(e) => setOpenaiApiKey(e.target.value)}
-                                placeholder="sk-... ou VITE_OPENAI_API_KEY no .env"
-                                aria-label="Chave da API OpenAI; pode usar variável de ambiente"
-                              />
+                              <div className="flex gap-2 items-start">
+                                <Input
+                                  id="openai-api-key"
+                                  type="password"
+                                  value={openaiApiKey}
+                                  onChange={(e) => {
+                                    setOpenaiApiKey(e.target.value);
+                                    setOpenaiKeyValidationMessage(null);
+                                  }}
+                                  placeholder="sk-... ou VITE_OPENAI_API_KEY no .env"
+                                  aria-label="Chave da API OpenAI; pode usar variável de ambiente"
+                                  className="flex-1 min-w-0"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleValidateOpenAIKey}
+                                  disabled={openaiKeyValidating}
+                                  aria-label="Validar chave da API OpenAI"
+                                >
+                                  {openaiKeyValidating ? "Validando…" : "Validar chave"}
+                                </Button>
+                              </div>
+                              {openaiKeyValidationMessage && (
+                                <p
+                                  className={cn(
+                                    "text-xs mt-1",
+                                    openaiKeyValidationMessage.ok ? "text-green-600 dark:text-green-400" : "text-destructive"
+                                  )}
+                                  role="status"
+                                >
+                                  {openaiKeyValidationMessage.message}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                Confira billing em{" "}
+                                <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline">
+                                  platform.openai.com/account/billing
+                                </a>
+                              </p>
                             </div>
                           </>
                         )}
@@ -3415,22 +3574,47 @@ export default function Generator() {
                       </Button>
                     </div>
                     {hasGenerated && (
-                      <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t">
-                        <Button onClick={handleDownloadZip} disabled={isExportingZip} size="sm">
-                          {isExportingZip ? "Gerando..." : "Baixar ZIP"}
+                      <>
+                        <p className="mt-4 pt-4 border-t text-xs text-muted-foreground">
+                          As telas geradas seguem o padrão Estrela UI, usando os componentes e o layout de interface definidos no repositório e no padrão de usabilidade.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2 justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              disabled={isExportingZip || isExportingZipBackend}
+                              size="sm"
+                              aria-label="Baixar ZIP do código (base ou com integração API)"
+                            >
+                              {(isExportingZip || isExportingZipBackend) ? "Gerando..." : "Baixar ZIP"}
+                              <ChevronDown className="ml-1 h-4 w-4" aria-hidden />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => void handleDownloadZip()}
+                              disabled={isExportingZip || isExportingZipBackend}
+                            >
+                              Código base ({stack === "react" ? "React" : stack === "vue" ? "Vue" : stack === "angular" ? "Angular" : "Bootstrap"})
+                            </DropdownMenuItem>
+                            {spec.type === "crud" && stack === "react" && (
+                              <DropdownMenuItem
+                                onClick={() => void handleDownloadZipBackend()}
+                                disabled={isExportingZip || isExportingZipBackend}
+                              >
+                                Código com integração API (React)
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button variant="outline" onClick={handleDownloadPdf} disabled={isExportingPdf} size="sm" title="PDF para apresentação ao cliente (apenas front da tela)">
+                          {isExportingPdf ? "Gerando..." : "Protótipo"}
                         </Button>
-                        {spec.type === "crud" && stack === "react" && (
-                          <Button variant="secondary" onClick={handleDownloadZipBackend} disabled={isExportingZipBackend} size="sm">
-                            {isExportingZipBackend ? "Gerando..." : "Completar para backend"}
-                          </Button>
-                        )}
-                        <Button variant="outline" onClick={handleDownloadPdf} disabled={isExportingPdf} size="sm">
-                          {isExportingPdf ? "Gerando..." : "PDF"}
-                        </Button>
-                        <Button variant="outline" onClick={handleDownloadHtmlZip} disabled={isExportingHtml} size="sm">
-                          {isExportingHtml ? "Gerando..." : "HTML (ZIP)"}
+                        <Button variant="outline" onClick={handleDownloadHtmlZip} disabled={isExportingHtml} size="sm" title="Protótipo funcional em HTML (ZIP)">
+                          {isExportingHtml ? "Gerando..." : "HTML"}
                         </Button>
                       </div>
+                      </>
                     )}
                   </CardContent>
                 </Card>
@@ -3495,6 +3679,76 @@ export default function Generator() {
             </Card>
         ) : (
           <div className="flex flex-col gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Prompt da tela</CardTitle>
+                <CardDescription>
+                  Prompt informado no passo 1. O resumo abaixo atualiza conforme você edita no painel de ajustes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {attemptedIAInterpretation && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Label className="text-muted-foreground text-xs flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
+                        Interpretação da IA
+                      </Label>
+                      {iaStatus === "success" && (
+                        <Badge variant="secondary" className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30" aria-label="IA conectada e resposta gerada">
+                          🟢 IA conectada e resposta gerada
+                        </Badge>
+                      )}
+                      {(iaStatus === "empty") && (
+                        <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" aria-label="IA conectada, resposta vazia">
+                          🟡 IA conectada, resposta vazia ou igual ao prompt
+                        </Badge>
+                      )}
+                      {(iaStatus === "unavailable" || iaStatus === "no_key") && (
+                        <Badge variant="secondary" className="bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30" aria-label="IA indisponível">
+                          🔴 IA indisponível
+                        </Badge>
+                      )}
+                    </div>
+                    {interpretedByIA ? (
+                      <p className="rounded-md bg-primary/10 border border-primary/20 p-3 text-sm whitespace-pre-wrap">{interpretedByIA}</p>
+                    ) : (
+                      <>
+                        {(iaStatus === "empty" || iaStatus === "unavailable" || iaStatus === "no_key") && (
+                          <p className="rounded-md bg-amber-500/10 border border-amber-500/30 p-3 text-sm text-amber-800 dark:text-amber-200" role="alert">
+                            {iaStatus === "no_key" || iaStatus === "unavailable"
+                              ? "IA indisponível. Gerando estrutura padrão sem interpretação semântica."
+                              : "IA conectada, mas resposta vazia ou igual ao prompt. Gerando estrutura padrão sem interpretação semântica."}
+                            {iaStatusMessage && (
+                              <span className="block mt-2 text-xs opacity-90">Detalhe: {iaStatusMessage}</span>
+                            )}
+                          </p>
+                        )}
+                        {iaStatus === "success" && !interpretedByIA && (
+                          <p className="rounded-md bg-muted/50 border border-border p-3 text-sm text-muted-foreground">
+                            Resposta da IA será exibida aqui após a geração.
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+                {spec.prompt ? (
+                  <>
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">Prompt (passo 1)</Label>
+                      <p className="rounded-md bg-muted/50 p-3 text-sm whitespace-pre-wrap">{spec.prompt}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">Resumo atual (atualizado ao editar)</Label>
+                      <p className="rounded-md bg-muted/50 p-3 text-sm">{livePromptSummary}</p>
+                    </div>
+                  </>
+                ) : (
+                  <p className="rounded-md bg-muted/50 p-3 text-sm">{livePromptSummary}</p>
+                )}
+              </CardContent>
+            </Card>
           <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -3658,31 +3912,6 @@ export default function Generator() {
                 </Tabs>
                 )}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Prompt da tela</CardTitle>
-                <CardDescription>
-                  Prompt informado no passo 1. O resumo abaixo atualiza conforme você edita no painel de ajustes.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {spec.prompt ? (
-                  <>
-                    <div className="space-y-1">
-                      <Label className="text-muted-foreground text-xs">Prompt (passo 1)</Label>
-                      <p className="rounded-md bg-muted/50 p-3 text-sm whitespace-pre-wrap">{spec.prompt}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-muted-foreground text-xs">Resumo atual (atualizado ao editar)</Label>
-                      <p className="rounded-md bg-muted/50 p-3 text-sm">{livePromptSummary}</p>
-                    </div>
-                  </>
-                ) : (
-                  <p className="rounded-md bg-muted/50 p-3 text-sm">{livePromptSummary}</p>
-                )}
               </CardContent>
             </Card>
 

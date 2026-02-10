@@ -16,6 +16,7 @@ import Componentes from "./pages/Componentes";
 import Auditoria from "./pages/Auditoria";
 import GeradorInicial from "./pages/GeradorInicial";
 import GeradorPreview from "./pages/GeradorPreview";
+import Manual from "./pages/Manual";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="meus-prototipos" element={<MeusPrototipos />} />
               <Route path="componentes" element={<Componentes />} />
               <Route path="auditoria" element={<Auditoria />} />
+              <Route path="manual" element={<Manual />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
